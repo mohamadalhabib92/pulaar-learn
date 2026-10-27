@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ch.mohamadba.pulaarlearn",
+      "bundleIdentifier": "com.vibecode.pulaarlearn-bdfkkx",
       "buildNumber": "1",
       "config": {
         "usesNonExemptEncryption": false
