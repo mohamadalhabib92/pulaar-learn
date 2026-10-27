@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Pulaar Learn",
+    "slug": "pulaar-learn",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ch.mohamed.pulaarlearn"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1F7A4D",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "ch.mohamed.pulaarlearn"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "bundler": "metro",
+      "name": "Pulaar Learn",
+      "shortName": "Pulaar",
+      "description": "Apprendre le pulaar avec des voix authentiques, hors ligne.",
+      "themeColor": "#1F7A4D",
+      "backgroundColor": "#F7F5EF"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-status-bar",
+      "expo-asset",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "scheme": "pulaarlearn",
+    "experiments": {
+      "baseUrl": "/pulaar-learn",
+      "typedRoutes": false
+    }
+  }
+}
