@@ -6,7 +6,7 @@
 |---|---|
 | Nom (≤ 30) | Pulaar Learn (12 car.) |
 | Sous-titre (≤ 30) | Apprendre le pulaar (peul) (26 car.) |
-| Bundle ID | `ch.mohamadba.pulaarlearn` |
+| Bundle ID | `com.vibecode.pulaarlearn-bdfkkx` |
 | SKU proposé | `pulaar-learn-ios-001` |
 | Projet EAS | `f9032b94-1ff9-4e1e-9c07-2392ed449f6b` (compte habib548) |
 | Version / build | 1.0.0 / numéro de build géré par EAS (remote, autoIncrement) |
