@@ -76,8 +76,8 @@ Pour régénérer les icônes : `python3 scripts/make-icons.py "#1F7A4D" "#FFFFF
 
 Voix synthétique via `server/tts-proxy.mjs` (voir `server/README.md`).
 
-- Clés **côté serveur uniquement** : `YOUR_ELEVENLABS_API_KEY`, `YOUR_ELEVENLABS_VOICE_ID`, `YOUR_OPENAI_API_KEY`. Ce sont des valeurs à remplacer.
-- Jamais de variable `EXPO_PUBLIC_*`.
+- Clés **côté serveur uniquement**, voir `.env.example` : `YOUR_ELEVENLABS_API_KEY`, `YOUR_ELEVENLABS_VOICE_ID`, `YOUR_OPENAI_API_KEY`. `USE_ELEVENLABS=false` et `FEATURE_TTS=false`.
+- `EXPO_PUBLIC_SENTRY_DSN=YOUR_SENTRY_DSN` reste inactif tant que la valeur n’est pas un vrai DSN. Aucune autre variable publique de secret.
 - Ces services sont payants. L’app reste utilisable sans eux.
 
 ## Structure

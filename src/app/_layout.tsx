@@ -1,33 +1,46 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { BootScreen } from '../components/ui';
+import { BootFallback, BootSkeleton } from '../components/Boot';
+import { AppErrorBoundary } from '../components/ErrorBoundary';
 import { I18nProvider } from '../lib/i18n';
+import { initCrashReporting } from '../lib/crash';
+import { FontProvider } from '../lib/fonts';
 import { appStore } from '../lib/store';
 import { colors } from '../theme';
 
 function Gate({ children }: { children: React.ReactNode }) {
-  const hydrated = appStore.useHydrated();
-  if (!hydrated) return <BootScreen label="Pulaar Learn…" />;
+  const status = appStore.useBoot();
+  if (status === 'timedOut') {
+    return <BootFallback onRetry={() => appStore.retryHydration()} onOffline={() => appStore.continueOffline()} />;
+  }
+  if (status !== 'ready' && status !== 'offline') return <BootSkeleton />;
   return <>{children}</>;
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    initCrashReporting();
+  }, []);
   return (
-    <SafeAreaProvider>
-      <Gate>
-        <I18nProvider>
-          <StatusBar style="dark" />
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="lesson/[id]" />
-            <Stack.Screen name="practice/[id]" />
-            <Stack.Screen name="recording/[id]" />
-            <Stack.Screen name="import" options={{ presentation: 'modal' }} />
-          </Stack>
-        </I18nProvider>
-      </Gate>
-    </SafeAreaProvider>
+    <AppErrorBoundary>
+      <SafeAreaProvider>
+        <FontProvider>
+          <I18nProvider>
+            <Gate>
+              <StatusBar style="dark" />
+              <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="lesson/[id]" />
+                <Stack.Screen name="practice/[id]" />
+                <Stack.Screen name="recording/[id]" />
+                <Stack.Screen name="import" options={{ presentation: 'modal' }} />
+              </Stack>
+            </Gate>
+          </I18nProvider>
+        </FontProvider>
+      </SafeAreaProvider>
+    </AppErrorBoundary>
   );
 }

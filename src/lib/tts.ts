@@ -8,12 +8,16 @@ export const TTS_PROXY_URL = '';
 export type TtsResult = { ok: true; uri: string } | { ok: false; reason: 'not_configured' | 'payment' | 'error' };
 
 export async function synthesize(text: string): Promise<TtsResult> {
+  // URL vide : aucun appel. ElevenLabs / OpenAI ne sont jamais sur le chemin de démarrage.
   if (!TTS_PROXY_URL) return { ok: false, reason: 'not_configured' };
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
   try {
     const res = await fetch(TTS_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, lang: 'ff' }),
+      signal: ctrl.signal,
     });
     if (res.status === 402) return { ok: false, reason: 'payment' };
     if (res.status === 501) return { ok: false, reason: 'not_configured' };
@@ -22,5 +26,7 @@ export async function synthesize(text: string): Promise<TtsResult> {
     return { ok: true, uri: URL.createObjectURL(blob) };
   } catch {
     return { ok: false, reason: 'error' };
+  } finally {
+    clearTimeout(timer);
   }
 }

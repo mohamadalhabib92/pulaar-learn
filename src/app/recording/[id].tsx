@@ -3,8 +3,10 @@ import React, { useState } from 'react';
 import { BackBar } from '../../components/BackBar';
 import { RecPlayer } from '../../components/RecPlayer';
 import { TranscriptEditor } from '../../components/TranscriptEditor';
-import { Badge, Button, Card, EmptyState, H1, Muted, Row, Screen } from '../../components/ui';
+import { ProvenanceCard } from '../../components/ProvenanceCard';
+import { Badge, Button, Card, EmptyState, Muted, PulaarText, Row, Screen } from '../../components/ui';
 import { findLesson } from '../../data/lessons';
+import { UPLOADS_PROVENANCE } from '../../data/packs';
 import { useI18n } from '../../lib/i18n';
 import { deleteImportFile } from '../../lib/audioFiles';
 import { appStore, removeImportMeta } from '../../lib/store';
@@ -30,7 +32,7 @@ export default function RecordingScreen() {
   return (
     <Screen>
       <BackBar label={t('back')} />
-      <H1>{rec.title}</H1>
+      <PulaarText bold style={{ fontSize: 28, fontWeight: '800' }}>{rec.title}</PulaarText>
       <Row style={{ flexWrap: 'wrap' }}>
         <Badge label={t(`tag_${rec.tag}` as 'tag_autre')} tone="info" />
         <Badge label="pulaar" />
@@ -38,6 +40,7 @@ export default function RecordingScreen() {
         {rec.kind === 'bundled' ? <Badge label={t('audioProvisional')} tone="warn" /> : null}
       </Row>
       {rec.createdAt ? <Muted>{t('importedOn', { d: new Date(rec.createdAt).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'en-GB') })}</Muted> : null}
+      <ProvenanceCard provenance={UPLOADS_PROVENANCE} />
       <RecPlayer recId={rec.id} />
       {lesson ? (
         <Card onPress={() => router.push(`/lesson/${lesson.id}`)}>

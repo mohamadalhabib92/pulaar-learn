@@ -2,8 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import { RecRow } from '../../components/RecRow';
-import { Body, Button, Card, EmptyState, H1, H2, Muted, Row, Screen } from '../../components/ui';
+import { ProvenanceCard } from '../../components/ProvenanceCard';
+import { Body, Button, Card, DialectBadge, EmptyState, H1, H2, Muted, Row, Screen } from '../../components/ui';
 import { findLesson } from '../../data/lessons';
+import { UPLOADS_PROVENANCE } from '../../data/packs';
 import { BUNDLED } from '../../data/recordings';
 import { useI18n } from '../../lib/i18n';
 import { appStore } from '../../lib/store';
@@ -31,10 +33,11 @@ export default function AudioTab() {
         })
       )}
 
-      <Row style={{ justifyContent: 'space-between', marginTop: space.sm }}>
+      <Row style={{ justifyContent: 'space-between', flexWrap: 'wrap', marginTop: space.sm }}>
         <H2 style={{ flex: 1 }}>{t('packMohamed')}</H2>
+        <DialectBadge label={UPLOADS_PROVENANCE.dialectLabel[lang]} tone="warn" />
       </Row>
-      <Muted>{t('uploadSource')} · {t('audioProvisional')} · {t('transcript')} : {t('toComplete').toLowerCase()}</Muted>
+      <Muted>{t('uploadsPackText')}</Muted>
       {BUNDLED.map((r) => {
         const l = findLesson(r.lessonId);
         return (
@@ -51,9 +54,13 @@ export default function AudioTab() {
       })}
 
       <Card style={{ gap: space.sm, borderStyle: 'dashed' }}>
-        <H2>{t('nativePack')}</H2>
+        <Row style={{ flexWrap: 'wrap' }}>
+          <H2 style={{ flex: 1 }}>{t('nativePack')}</H2>
+          <DialectBadge flag="🇬🇲" label={t('packGambia')} tone="warn" />
+        </Row>
         <Muted>{t('nativePackText')}</Muted>
       </Card>
+      <ProvenanceCard provenance={UPLOADS_PROVENANCE} />
     </Screen>
   );
 }

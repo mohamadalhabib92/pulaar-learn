@@ -4,6 +4,7 @@ import { Body, Button, Card, Chip, H1, H3, Muted, Row, Screen } from '../../comp
 import { SOURCE } from '../../data/lessons';
 import { JANNGU } from '../../data/recordings';
 import { LANGS } from '../../i18n/strings';
+import type { AppState } from '../../lib/store';
 import { useI18n } from '../../lib/i18n';
 import { appStore, resetProgress } from '../../lib/store';
 import { colors, space } from '../../theme';
@@ -46,6 +47,19 @@ export default function Settings() {
             </Row>
           </>
         ) : null}
+      </Card>
+      <Card style={{ gap: space.sm }}>
+        <H3>{t('reduceMotion')}</H3>
+        <Muted>{t('reduceMotionText')}</Muted>
+        <Row style={{ flexWrap: 'wrap' }}>
+          {([
+            ['system', t('reduceSystem')],
+            ['on', t('reduceOn')],
+            ['off', t('reduceOff')],
+          ] as const).map(([value, label]) => (
+            <Chip key={value} label={label} active={s.reduceMotion === value} onPress={() => appStore.set({ reduceMotion: value satisfies AppState['reduceMotion'] })} />
+          ))}
+        </Row>
       </Card>
       <Card style={{ gap: space.sm }}>
         <H3>{t('data')}</H3>

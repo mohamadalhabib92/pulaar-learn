@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { RecPlayer } from '../../components/RecPlayer';
-import { Body, Button, Card, H1, H2, H3, Muted, Row, Screen } from '../../components/ui';
+import { Body, Button, Card, H1, H2, H3, Muted, PulaarText, Row, Screen } from '../../components/ui';
 import { LESSONS } from '../../data/lessons';
 import { JANNGU } from '../../data/recordings';
 import { useI18n } from '../../lib/i18n';
@@ -33,7 +33,7 @@ export default function Accent() {
           <H2 color={colors.onPrimary} style={{ flex: 1 }}>Janngu</H2>
         </Row>
         <Body color={colors.onPrimary} style={{ fontWeight: '700' }}>{t('jannguLabel')}</Body>
-        <Muted color="#D5ECDF">{t('jannguText')}</Muted>
+        <Muted color={colors.onPrimaryMuted}>{t('jannguText')}</Muted>
         <Row style={{ flexWrap: 'wrap' }}>
           <LinkBtn icon="globe-outline" label={t('website')} onPress={() => open(JANNGU.site)} />
           <LinkBtn icon="paper-plane-outline" label={t('telegram')} onPress={() => open(JANNGU.telegram)} />
@@ -47,7 +47,7 @@ export default function Accent() {
       <View style={styles.grid}>
         {sounds.map((it) => (
           <View key={it.pu} style={styles.cell}>
-            <Body style={styles.letter}>{it.pu}</Body>
+            <PulaarText bold style={styles.letter}>{it.pu}</PulaarText>
             <Muted center numberOfLines={3}>{lang === 'fr' ? it.fr : it.en}</Muted>
           </View>
         ))}
@@ -81,10 +81,10 @@ export default function Accent() {
         />
         {tts && tts !== 'busy' ? (
           <View style={styles.notice} accessibilityRole="alert">
-            <Body style={{ fontWeight: '700' }} color={colors.accentText}>
-              {tts === 'not_configured' ? t('ttsNotConfigured') : tts === 'payment' ? t('ttsPayment') : t('ttsError')}
-            </Body>
-            {tts === 'not_configured' ? <Muted color={colors.accentText}>{t('ttsNotConfiguredText')}</Muted> : null}
+            <Body style={{ fontWeight: '700' }} color={colors.accentText}>{t('ttsNotConfigured')}</Body>
+            <Muted color={colors.accentText}>
+              {tts === 'payment' ? t('ttsPayment') : tts === 'error' ? t('ttsError') : t('ttsNotConfiguredText')}
+            </Muted>
           </View>
         ) : null}
         {showNative ? <RecPlayer recId="up-3" /> : null}
@@ -106,6 +106,6 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   cell: { width: '31%', flexGrow: 1, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, padding: space.sm, alignItems: 'center', gap: 2, minHeight: 96 },
   letter: { fontSize: 30, fontWeight: '800', color: colors.primary },
-  link: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.surface, borderRadius: 999, paddingHorizontal: space.md, paddingVertical: 8 },
+  link: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.surface, borderRadius: 999, paddingHorizontal: space.md, minHeight: 44 },
   notice: { backgroundColor: colors.accentSoft, borderRadius: radius.md, padding: space.md, gap: 4 },
 });
