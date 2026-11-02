@@ -169,6 +169,25 @@ test('une lecture en échec ne rend pas le stockage prêt', async () => {
   assert.ok(mem.data['pulaar:v1'].includes('imp-1'));
 });
 
+test('un JSON illisible n’est pas écrasé', async () => {
+  const corrupt = '{not json';
+  const mem = memoryStorage({ 'pulaar:v1': corrupt });
+  const store = createPersistedStoreCore('pulaar:v1', blank(), {
+    timeoutMs: 30,
+    saveDelayMs: 0,
+    storage: mem.storage,
+  });
+  mem.release(corrupt);
+  await tick();
+  assert.equal(store.isStorageReady(), false);
+  store.continueOffline();
+  store.set({ xp: 9 });
+  store.reset();
+  await tick();
+  assert.equal(mem.writes.length, 0);
+  assert.equal(mem.data['pulaar:v1'], corrupt);
+});
+
 test('une lecture vide réussie autorise ensuite les sauvegardes', async () => {
   const mem = memoryStorage();
   const initial = blank();

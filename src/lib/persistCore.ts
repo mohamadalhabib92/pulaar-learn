@@ -80,7 +80,8 @@ export function createPersistedStoreCore<T extends object>(key: string, initial:
           try {
             applyStored(JSON.parse(raw) as Partial<T>);
           } catch {
-            // JSON illisible : on n’écrit pas par-dessus tant que l’utilisateur n’a rien modifié.
+            // Fichier présent mais illisible : ne pas l’écraser par l’état vide.
+            return;
           }
         }
         storageReady = true;
