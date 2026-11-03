@@ -1,6 +1,8 @@
 import type { Lang } from '../i18n/strings';
 import type { Tag } from '../data/recordings';
+import type { PackFilter } from '../data/packs';
 import { LESSONS } from '../data/lessons';
+import { mergeAppState } from './migrate';
 import { createPersistedStore } from './persist';
 
 export type LessonProgress = { seen: boolean; best: number; attempts: number };
@@ -39,6 +41,10 @@ export type AppState = {
   imports: ImportMeta[];
   transcripts: Record<string, string>;
   rate: number;
+  /** Filtre d’affichage des packs. N’efface aucune leçon. */
+  packFilter: PackFilter;
+  /** system = réglage du téléphone. */
+  reduceMotion: 'system' | 'on' | 'off';
 };
 
 const initial: AppState = {
@@ -59,9 +65,16 @@ const initial: AppState = {
   imports: [],
   transcripts: {},
   rate: 1,
+  packFilter: 'all',
+  reduceMotion: 'system',
 };
 
-export const appStore = createPersistedStore<AppState>('pulaar:v1', initial);
+/** Clé historique. Ne pas la renommer : la progression déjà enregistrée en dépend. */
+export const STORAGE_KEY = 'pulaar:v1';
+
+export const appStore = createPersistedStore<AppState>(STORAGE_KEY, initial, {
+  merge: (stored, current, dirty) => mergeAppState(stored, current, dirty, initial),
+});
 
 export const BADGES: { id: string; icon: string; fr: string; en: string; test: (s: AppState) => boolean }[] = [
   { id: 'first-listen', icon: '🎧', fr: 'Première écoute', en: 'First listen', test: (s) => s.listened.length >= 1 },
@@ -130,7 +143,17 @@ export const setTranscript = (recId: string, text: string) =>
 
 /** Réinitialise la progression mais garde langue, réglages, imports et transcriptions. */
 export const resetProgress = () =>
-  appStore.set((s) => ({ ...initial, lang: s.lang, questEnabled: s.questEnabled, dailyGoal: s.dailyGoal, imports: s.imports, transcripts: s.transcripts, rate: s.rate }));
+  appStore.set((s) => ({
+    ...initial,
+    lang: s.lang,
+    questEnabled: s.questEnabled,
+    dailyGoal: s.dailyGoal,
+    imports: s.imports,
+    transcripts: s.transcripts,
+    rate: s.rate,
+    packFilter: s.packFilter,
+    reduceMotion: s.reduceMotion,
+  }));
 
 export const lessonStatus = (s: AppState, id: string): 'mastered' | 'seen' | 'new' => {
   const p = s.lessons[id];

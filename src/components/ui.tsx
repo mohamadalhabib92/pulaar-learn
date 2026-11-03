@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Animated,
   GestureResponderEvent,
   LayoutChangeEvent,
@@ -15,7 +14,9 @@ import {
   ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, radius, space } from '../theme';
+import { usePulaarFontReady } from '../lib/fonts';
+import { useReduceMotion } from '../lib/motion';
+import { colors, fonts, hit, radius, space, type as typeScale } from '../theme';
 
 export function Screen({
   children,
@@ -59,11 +60,28 @@ const mk = (base: TextStyle) =>
       />
     );
   };
-export const H1 = mk({ fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 });
-export const H2 = mk({ fontSize: 20, fontWeight: '700', color: colors.text });
-export const H3 = mk({ fontSize: 16, fontWeight: '700', color: colors.text });
-export const Body = mk({ fontSize: 15, lineHeight: 22, color: colors.text });
-export const Muted = mk({ fontSize: 13, lineHeight: 18, color: colors.muted });
+export const H1 = mk({ fontSize: typeScale.h1, fontWeight: '800', color: colors.text, letterSpacing: -0.5 });
+export const H2 = mk({ fontSize: typeScale.h2, fontWeight: '700', color: colors.text });
+export const H3 = mk({ fontSize: typeScale.h3, fontWeight: '700', color: colors.text });
+export const Body = mk({ fontSize: typeScale.body, lineHeight: 22, color: colors.text });
+export const Muted = mk({ fontSize: typeScale.small, lineHeight: 18, color: colors.muted });
+
+/** Texte pulaar : Noto Sans si elle est prête, sinon la police du système. lang=ff pour le lecteur d’écran. */
+export function PulaarText({ style, bold = false, center, ...p }: TextProps & { bold?: boolean; center?: boolean }) {
+  const ready = usePulaarFontReady();
+  return (
+    <Text
+      {...p}
+      accessibilityLanguage="ff"
+      style={[
+        { fontSize: bold ? typeScale.pulaar : typeScale.body, color: colors.text },
+        center ? { textAlign: 'center' } : null,
+        style,
+        ready ? { fontFamily: bold ? fonts.bold : fonts.regular, fontWeight: 'normal' } : null,
+      ]}
+    />
+  );
+}
 
 export function Card({
   children,
@@ -76,13 +94,14 @@ export function Card({
   onPress?: () => void;
   accessibilityLabel?: string;
 }) {
+  const reduce = useReduceMotion();
   if (onPress) {
     return (
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         onPress={onPress}
-        style={({ pressed }) => [styles.card, pressed && { opacity: 0.85, transform: [{ scale: 0.99 }] }, style]}
+        style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }, pressed && !reduce && { transform: [{ scale: 0.99 }] }, style]}
       >
         {children}
       </Pressable>
@@ -102,7 +121,7 @@ export function Button({
 }: {
   label: string;
   onPress?: () => void;
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent';
   icon?: React.ReactNode;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -111,12 +130,14 @@ export function Button({
   const bg =
     variant === 'primary'
       ? colors.primary
-      : variant === 'secondary'
-        ? colors.primarySoft
-        : variant === 'danger'
-          ? colors.danger
-          : 'transparent';
-  const fg = variant === 'primary' || variant === 'danger' ? colors.onPrimary : colors.primary;
+      : variant === 'accent'
+        ? colors.accent
+        : variant === 'secondary'
+          ? colors.primarySoft
+          : variant === 'danger'
+            ? colors.danger
+            : 'transparent';
+  const fg = variant === 'accent' ? colors.accentInk : variant === 'primary' || variant === 'danger' ? colors.onPrimary : colors.primary;
   return (
     <Pressable
       accessibilityRole="button"
@@ -125,7 +146,7 @@ export function Button({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        small && { minHeight: 36, paddingHorizontal: space.md },
+        small && { minHeight: hit.min, paddingHorizontal: space.md },
         { backgroundColor: bg, opacity: disabled ? 0.45 : pressed ? 0.85 : 1 },
         variant === 'ghost' && { borderWidth: 1, borderColor: colors.border },
         style,
@@ -158,6 +179,16 @@ export function Chip({
     >
       <Text style={[styles.chipText, active && { color: colors.onPrimary }]}>{label}</Text>
     </Pressable>
+  );
+}
+
+/** Drapeau toujours accompagné du nom du dialecte, lisible sans l’emoji. */
+export function DialectBadge({ flag, label, tone = 'info' }: { flag?: string; label: string; tone?: 'neutral' | 'warn' | 'ok' | 'info' }) {
+  const text = flag ? `${flag} ${label}` : label;
+  return (
+    <View accessibilityLabel={label}>
+      <Badge label={text} tone={tone} />
+    </View>
   );
 }
 
@@ -258,8 +289,13 @@ export function Slider({
 }
 
 export function Skeleton({ height = 18, width = '100%', style }: { height?: number; width?: number | `${number}%`; style?: StyleProp<ViewStyle> }) {
-  const a = useRef(new Animated.Value(0.4)).current;
+  const reduce = useReduceMotion();
+  const a = useRef(new Animated.Value(reduce ? 0.7 : 0.4)).current;
   useEffect(() => {
+    if (reduce) {
+      a.setValue(0.7);
+      return;
+    }
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(a, { toValue: 1, duration: 700, useNativeDriver: false }),
@@ -268,8 +304,8 @@ export function Skeleton({ height = 18, width = '100%', style }: { height?: numb
     );
     loop.start();
     return () => loop.stop();
-  }, [a]);
-  return <Animated.View style={[{ height, width, borderRadius: 8, backgroundColor: colors.surfaceAlt, opacity: a }, style]} />;
+  }, [a, reduce]);
+  return <Animated.View accessibilityElementsHidden style={[{ height, width, borderRadius: 8, backgroundColor: colors.surfaceAlt, opacity: a }, style]} />;
 }
 
 export function EmptyState({ icon, title, text, action }: { icon?: React.ReactNode; title: string; text?: string; action?: React.ReactNode }) {
@@ -291,11 +327,15 @@ export function Spacer({ h = space.md }: { h?: number }) {
   return <View style={{ height: h }} />;
 }
 
-export function BootScreen({ label }: { label: string }) {
+export function BootScreen({ label }: { label?: string }) {
   return (
-    <View style={[styles.screen, { alignItems: 'center', justifyContent: 'center', gap: 12 }]}>
-      <ActivityIndicator color={colors.primary} />
-      <Muted>{label}</Muted>
+    <View style={[styles.screen, { padding: space.lg, gap: space.md }]}>
+      <Skeleton height={28} width="46%" />
+      <Skeleton height={88} />
+      <Skeleton height={72} />
+      <Skeleton height={72} />
+      <Skeleton height={72} />
+      {label ? <Muted>{label}</Muted> : null}
     </View>
   );
 }
@@ -318,7 +358,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   button: {
-    minHeight: 46,
+    minHeight: hit.min,
     paddingHorizontal: space.lg,
     borderRadius: radius.md,
     alignItems: 'center',
@@ -328,7 +368,7 @@ const styles = StyleSheet.create({
   },
   buttonText: { fontSize: 15, fontWeight: '700' },
   chip: {
-    minHeight: 36,
+    minHeight: hit.min,
     paddingHorizontal: 14,
     borderRadius: 999,
     borderWidth: 1,
@@ -339,7 +379,7 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 13, fontWeight: '600', color: colors.text },
   badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, alignSelf: 'flex-start' },
   badgeText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
-  sliderHit: { height: 44, justifyContent: 'center' },
+  sliderHit: { height: hit.audio, justifyContent: 'center' },
   sliderTrack: { height: 6, borderRadius: 3, backgroundColor: colors.border, overflow: 'hidden' },
   sliderFill: { position: 'absolute', top: 0, bottom: 0, backgroundColor: colors.primary },
   sliderThumb: {

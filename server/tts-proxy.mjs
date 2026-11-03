@@ -2,25 +2,34 @@
  * Proxy de voix synthétique — PHASE 2, OPTIONNEL, NON DÉPLOYÉ.
  * Les clés restent ici, côté serveur, et ne sont jamais dans l'app (pas d'EXPO_PUBLIC_*).
  *
+ *   FEATURE_TTS=false USE_ELEVENLABS=false \
  *   ELEVENLABS_API_KEY=YOUR_ELEVENLABS_API_KEY \
  *   ELEVENLABS_VOICE_ID=YOUR_ELEVENLABS_VOICE_ID \
+ *   REFERENCE_PULAAR_VOICE_ID=YOUR_ELEVENLABS_VOICE_ID \
  *   OPENAI_API_KEY=YOUR_OPENAI_API_KEY \
+ *   PORT=YOUR_PORT \
  *   node server/tts-proxy.mjs
  *
  * POST /tts  {"text": "Jam waali"}  → audio/mpeg
- * Renvoie 501 si aucune clé n'est configurée, et 402 si le fournisseur signale un problème de crédit.
+ * 501 si FEATURE_TTS n'est pas true, ou si la clé manque / vaut YOUR_*.
+ * 402 si le fournisseur signale un crédit ou un quota épuisé.
+ * USE_ELEVENLABS et REFERENCE_PULAAR_VOICE_ID n'acceptent que false / YOUR_* dans le dépôt.
  */
 import http from 'node:http';
 
-const PORT = Number(process.env.PORT || 8787);
+const parsedPort = Number(process.env.PORT);
+const PORT = Number.isFinite(parsedPort) && parsedPort > 0 ? parsedPort : 8787;
 const ALLOW_ORIGIN = process.env.ALLOW_ORIGIN || '*';
-const real = (v) => (v && !v.startsWith('YOUR_') ? v : null);
+const real = (v) => (v && !String(v).startsWith('YOUR_') && !String(v).includes('YOUR_') ? v : null);
+const FEATURE_TTS = process.env.FEATURE_TTS === 'true';
+const USE_ELEVENLABS = process.env.USE_ELEVENLABS === 'true';
 const EL_KEY = real(process.env.ELEVENLABS_API_KEY);
-const EL_VOICE = real(process.env.ELEVENLABS_VOICE_ID);
+const EL_VOICE = real(process.env.ELEVENLABS_VOICE_ID) || real(process.env.REFERENCE_PULAAR_VOICE_ID);
 const OA_KEY = real(process.env.OPENAI_API_KEY);
 
 async function synth(text) {
-  if (EL_KEY && EL_VOICE) {
+  if (!FEATURE_TTS) return null;
+  if (USE_ELEVENLABS && EL_KEY && EL_VOICE) {
     return fetch(`https://api.elevenlabs.io/v1/text-to-speech/${EL_VOICE}`, {
       method: 'POST',
       headers: { 'xi-api-key': EL_KEY, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },

@@ -6,8 +6,10 @@ import { BackBar } from '../../components/BackBar';
 import { ProvisionalBanner } from '../../components/Quest';
 import { RecPlayer } from '../../components/RecPlayer';
 import { TranscriptEditor } from '../../components/TranscriptEditor';
-import { Badge, Body, Button, Card, EmptyState, H1, H3, Muted, Row, Screen } from '../../components/ui';
+import { ProvenanceCard } from '../../components/ProvenanceCard';
+import { Badge, Body, Button, Card, DialectBadge, EmptyState, H1, H3, Muted, PulaarText, Row, Screen } from '../../components/ui';
 import { findLesson, LESSONS } from '../../data/lessons';
+import { provenanceForLesson } from '../../data/packs';
 import { bundledForLesson } from '../../data/recordings';
 import { useI18n } from '../../lib/i18n';
 import { appStore, markSeen } from '../../lib/store';
@@ -40,9 +42,14 @@ export default function LessonScreen() {
   return (
     <Screen>
       <BackBar label={t('back')} />
-      <Muted>{t('lessonN', { n: lesson.n })} · {t('items', { n: lesson.items.length })}</Muted>
+      <Row style={{ flexWrap: 'wrap' }}>
+        <Muted>{t('lessonN', { n: lesson.n })} · {t('items', { n: lesson.items.length })}</Muted>
+        <DialectBadge flag="🇲🇷" label={t('packMauritania')} />
+      </Row>
       <H1>{lesson.title[lang]}</H1>
       <Body color={colors.muted}>{lesson.intro[lang]}</Body>
+      <Muted>{t('peaceCorpsMention')}</Muted>
+      <ProvenanceCard provenance={provenanceForLesson(lesson.id)} />
 
       <Card style={{ gap: space.sm }}>
         <Row>
@@ -67,7 +74,7 @@ export default function LessonScreen() {
         </View>
         {lesson.items.map((it, k) => (
           <View key={k} style={[styles.item, k % 2 === 1 && { backgroundColor: colors.bg }]}>
-            <Body style={styles.pu}>{it.pu}</Body>
+            <PulaarText bold style={styles.pu}>{it.pu}</PulaarText>
             <View style={{ flex: 1 }}>
               <Body>{lang === 'fr' ? it.fr : it.en}</Body>
               <Muted>{lang === 'fr' ? it.en : it.fr}</Muted>

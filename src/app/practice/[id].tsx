@@ -4,7 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { BackBar } from '../../components/BackBar';
 import { RecPlayer } from '../../components/RecPlayer';
-import { Body, Button, Card, EmptyState, H1, H2, Muted, ProgressBar, Row, Screen } from '../../components/ui';
+import { Body, Button, Card, EmptyState, H1, H2, Muted, ProgressBar, PulaarText, Row, Screen } from '../../components/ui';
 import { findLesson } from '../../data/lessons';
 import { useI18n } from '../../lib/i18n';
 import { buildBoss, buildLessonQuiz } from '../../lib/practice';
@@ -102,9 +102,11 @@ export default function Practice() {
       <ProgressBar value={(i + (answered ? 1 : 0)) / qs.length} height={8} />
       <Card style={{ gap: space.sm, alignItems: 'center', paddingVertical: space.xl }}>
         <Muted>{label}</Muted>
-        <Body center style={q.promptIsPu ? styles.puPrompt : styles.prompt}>
-          {q.prompt}
-        </Body>
+        {q.promptIsPu ? (
+          <PulaarText bold center style={styles.puPrompt}>{q.prompt}</PulaarText>
+        ) : (
+          <Body center style={styles.prompt}>{q.prompt}</Body>
+        )}
       </Card>
       <View style={{ gap: space.sm }}>
         {q.options.map((o) => {
@@ -118,7 +120,11 @@ export default function Practice() {
               onPress={() => choose(o)}
               style={({ pressed }) => [styles.opt, state === 'ok' && styles.optOk, state === 'ko' && styles.optKo, pressed && !answered && { opacity: 0.8 }]}
             >
-              <Body style={[{ flex: 1, fontSize: q.promptIsPu ? 16 : 20, fontWeight: q.promptIsPu ? '500' : '800' }]}>{o}</Body>
+              {q.promptIsPu ? (
+                <Body style={{ flex: 1, fontSize: 16 }}>{o}</Body>
+              ) : (
+                <PulaarText bold style={{ flex: 1, fontSize: 20 }}>{o}</PulaarText>
+              )}
               {state === 'ok' ? <Ionicons name="checkmark-circle" size={22} color={colors.ok} /> : state === 'ko' ? <Ionicons name="close-circle" size={22} color={colors.danger} /> : null}
             </Pressable>
           );

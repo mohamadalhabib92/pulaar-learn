@@ -5,7 +5,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { fmtTime } from '../data/recordings';
 import { useI18n } from '../lib/i18n';
 import { appStore, markListened } from '../lib/store';
-import { colors, radius, space } from '../theme';
+import { colors, hit, radius, space, BOOT_TIMEOUT_MS } from '../theme';
 import { Body, Muted, Row, Slider } from './ui';
 
 const RATES = [0.75, 1, 1.25];
@@ -65,7 +65,7 @@ function Inner({ source, recId, fallbackDuration, initialRate }: { source: Audio
 
   useEffect(() => {
     if (status.isLoaded) return;
-    const id = setTimeout(() => setTimedOut(true), 12000);
+    const id = setTimeout(() => setTimedOut(true), BOOT_TIMEOUT_MS);
     return () => clearTimeout(id);
   }, [status.isLoaded]);
 
@@ -141,7 +141,11 @@ function Inner({ source, recId, fallbackDuration, initialRate }: { source: Audio
       />
       <Row style={{ justifyContent: 'space-between' }}>
         <Muted>{fmtTime(pos)}</Muted>
-        {!status.isLoaded ? <Muted>{t('audioLoading')}</Muted> : null}
+        {!status.isLoaded ? (
+          <Muted accessibilityLiveRegion="polite">{t('audioLoadingState')}</Muted>
+        ) : status.isBuffering ? (
+          <Muted accessibilityLiveRegion="polite">{t('audioLoading')}</Muted>
+        ) : null}
         <Muted>{fmtTime(duration)}</Muted>
       </Row>
         <Row style={{ justifyContent: 'center' }} gap={6}>
@@ -177,6 +181,6 @@ function RoundBtn({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphM
 const styles = StyleSheet.create({
   box: { backgroundColor: colors.bg, borderRadius: radius.lg, padding: space.md, gap: space.sm, borderWidth: 1, borderColor: colors.border },
   play: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  round: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
-  rate: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, minWidth: 48, alignItems: 'center' },
+  round: { width: hit.audio, height: hit.audio, borderRadius: hit.audio / 2, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
+  rate: { minHeight: hit.audio, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, minWidth: hit.audio, alignItems: 'center', justifyContent: 'center' },
 });
