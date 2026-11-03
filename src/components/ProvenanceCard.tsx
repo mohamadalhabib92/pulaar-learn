@@ -13,7 +13,7 @@ export function ProvenanceCard({ provenance }: { provenance: Provenance }) {
     <Card style={{ gap: space.sm }}>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
         <DialectBadge flag={provenance.flag || undefined} label={provenance.dialectLabel[lang]} tone={provenance.dialect === 'a_valider' ? 'warn' : 'info'} />
-        <DialectBadge label={t(reviewLabelKey[provenance.review])} tone={provenance.review === 'a_completer' ? 'warn' : 'ok'} />
+        <DialectBadge label={t(reviewLabelKey[provenance.review])} tone={provenance.review === 'a_completer' || provenance.review === 'a_relire' ? 'warn' : 'ok'} />
       </View>
       <Muted>{t('sourceLabel')} : {provenance.source[lang]}</Muted>
       <Muted>{t('speakerLabel')} : {provenance.speakerNote[lang]}</Muted>
