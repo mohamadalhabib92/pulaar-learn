@@ -6,7 +6,8 @@ import { TranscriptEditor } from '../../components/TranscriptEditor';
 import { ProvenanceCard } from '../../components/ProvenanceCard';
 import { Badge, Button, Card, EmptyState, Muted, PulaarText, Row, Screen } from '../../components/ui';
 import { findLesson } from '../../data/lessons';
-import { UPLOADS_PROVENANCE } from '../../data/packs';
+import { UPLOADS_NOV_PROVENANCE, UPLOADS_PROVENANCE } from '../../data/packs';
+import { isNovUpload } from '../../data/recordings';
 import { useI18n } from '../../lib/i18n';
 import { deleteImportFile } from '../../lib/audioFiles';
 import { appStore, removeImportMeta } from '../../lib/store';
@@ -37,10 +38,11 @@ export default function RecordingScreen() {
         <Badge label={t(`tag_${rec.tag}` as 'tag_autre')} tone="info" />
         <Badge label="pulaar" />
         <Badge label={t('uploadSource')} />
-        {rec.kind === 'bundled' ? <Badge label={t('audioProvisional')} tone="warn" /> : null}
+        {rec.kind === 'bundled' && !isNovUpload(rec.id) ? <Badge label={t('audioProvisional')} tone="warn" /> : null}
+        {rec.kind === 'bundled' && isNovUpload(rec.id) ? <Badge label={t('titleToConfirm')} tone="warn" /> : null}
       </Row>
       {rec.createdAt ? <Muted>{t('importedOn', { d: new Date(rec.createdAt).toLocaleDateString(lang === 'fr' ? 'fr-CH' : 'en-GB') })}</Muted> : null}
-      <ProvenanceCard provenance={UPLOADS_PROVENANCE} />
+      <ProvenanceCard provenance={isNovUpload(rec.id) ? UPLOADS_NOV_PROVENANCE : UPLOADS_PROVENANCE} />
       <RecPlayer recId={rec.id} />
       {lesson ? (
         <Card onPress={() => router.push(`/lesson/${lesson.id}`)}>

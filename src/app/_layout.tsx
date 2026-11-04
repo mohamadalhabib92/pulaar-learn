@@ -35,6 +35,9 @@ export default function RootLayout() {
                 <Stack.Screen name="lesson/[id]" />
                 <Stack.Screen name="practice/[id]" />
                 <Stack.Screen name="recording/[id]" />
+                <Stack.Screen name="contes/index" />
+                <Stack.Screen name="contes/[id]" />
+                <Stack.Screen name="contes/taro" />
                 <Stack.Screen name="import" options={{ presentation: 'modal' }} />
               </Stack>
             </Gate>

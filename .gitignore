@@ -42,3 +42,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Références internes : jamais dans le dépôt public (voir docs/reference/README.md)
+docs/reference/**/*.pdf
+docs/reference/**/*.docx

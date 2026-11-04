@@ -39,7 +39,44 @@ export const BUNDLED: BundledRecording[] = [
   mk(8, 'pc-8', 'phrases', 178.7, require('../../assets/audio/upload-08.mp3')),
 ];
 
-export const findBundled = (id: string) => BUNDLED.find((r) => r.id === id);
+/**
+ * Pack « Uploads Mohamed — 03.11.2026 » : 5 MP3 nouveaux (upload-09 à upload-13), doublons déjà retirés.
+ * Contenu non écouté : titres PROVISOIRES, à confirmer par Mohamed. Aucune leçon associée, aucune transcription inventée.
+ * Le pack du 2026-09-17 (BUNDLED ci-dessus) reste intact.
+ */
+export type NewUploadRecording = Omit<BundledRecording, 'lessonId'> & {
+  lessonId: null;
+  /** false tant que Mohamed n’a pas confirmé le titre. */
+  titleConfirmed: boolean;
+  receivedOn: string;
+};
+
+const mkNov = (n: number, durationS: number, source: number): NewUploadRecording => ({
+  id: `up-${n}`,
+  n,
+  title: { fr: `Upload Mohamed n° ${n} (titre à confirmer)`, en: `Mohamed upload #${n} (title to be confirmed)` },
+  lessonId: null,
+  tag: 'autre',
+  durationS,
+  source,
+  file: `upload-${String(n).padStart(2, '0')}.mp3`,
+  titleConfirmed: false,
+  receivedOn: '2026-11-03',
+});
+
+export const BUNDLED_NOV: NewUploadRecording[] = [
+  mkNov(9, 123.9, require('../../assets/audio/upload-09.mp3')),
+  mkNov(10, 96.8, require('../../assets/audio/upload-10.mp3')),
+  mkNov(11, 79.3, require('../../assets/audio/upload-11.mp3')),
+  mkNov(12, 180.4, require('../../assets/audio/upload-12.mp3')),
+  mkNov(13, 177.0, require('../../assets/audio/upload-13.mp3')),
+];
+
+export type AnyBundled = BundledRecording | NewUploadRecording;
+export const ALL_BUNDLED: AnyBundled[] = [...BUNDLED, ...BUNDLED_NOV];
+export const isNovUpload = (id: string) => BUNDLED_NOV.some((r) => r.id === id);
+
+export const findBundled = (id: string): AnyBundled | undefined => ALL_BUNDLED.find((r) => r.id === id);
 export const bundledForLesson = (lessonId: string) => BUNDLED.find((r) => r.lessonId === lessonId);
 
 export const JANNGU = {

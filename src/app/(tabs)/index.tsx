@@ -6,7 +6,8 @@ import { ProvisionalBanner, QuestStrip } from '../../components/Quest';
 import { Badge, Body, Button, Card, Chip, DialectBadge, H1, H2, H3, Muted, PulaarText, Row, Screen } from '../../components/ui';
 import { LESSONS, SOURCE } from '../../data/lessons';
 import { PACKS, type PackFilter } from '../../data/packs';
-import { BUNDLED, WONNOO } from '../../data/recordings';
+import { BUNDLED, BUNDLED_NOV, WONNOO } from '../../data/recordings';
+import { EPISODES } from '../../data/contes';
 import { useI18n } from '../../lib/i18n';
 import { appStore, lessonStatus } from '../../lib/store';
 import { colors, radius, space } from '../../theme';
@@ -36,8 +37,8 @@ export default function Learn() {
       <ProvisionalBanner />
 
       <Row style={{ flexWrap: 'wrap' }}>
-        {(['all', 'mauritania', 'gambia', 'uploads'] as PackFilter[]).map((id) => (
-          <Chip key={id} label={t(id === 'all' ? 'packAll' : id === 'mauritania' ? 'packMauritania' : id === 'gambia' ? 'packGambia' : 'packUploads')} active={s.packFilter === id} onPress={() => appStore.set({ packFilter: id })} />
+        {(['all', 'mauritania', 'gambia', 'uploads', 'contes'] as PackFilter[]).map((id) => (
+          <Chip key={id} label={t(id === 'all' ? 'packAll' : id === 'mauritania' ? 'packMauritania' : id === 'gambia' ? 'packGambia' : id === 'contes' ? 'packContes' : 'packUploads')} active={s.packFilter === id} onPress={() => appStore.set({ packFilter: id })} />
         ))}
       </Row>
 
@@ -105,6 +106,29 @@ export default function Learn() {
           </Row>
           <Muted>{t('uploadsPackText')}</Muted>
           <Muted>{BUNDLED.length} · {PACKS.find((p) => p.id === 'uploads')?.name[lang]}</Muted>
+        </Card>
+      ) : null}
+
+      {s.packFilter === 'all' || s.packFilter === 'uploads' ? (
+        <Card style={{ gap: space.sm }} onPress={() => router.push('/audio')}>
+          <Row style={{ flexWrap: 'wrap' }}>
+            <H3 style={{ flex: 1 }}>{t('packUploadsNov')}</H3>
+            <DialectBadge label={t('titleToConfirm')} tone="warn" />
+          </Row>
+          <Muted>{t('uploadsNovText')}</Muted>
+          <Muted>{BUNDLED_NOV.length} · {PACKS.find((p) => p.id === 'uploads_nov')?.name[lang]}</Muted>
+        </Card>
+      ) : null}
+
+      {s.packFilter === 'all' || s.packFilter === 'contes' ? (
+        <Card style={{ gap: space.sm }} onPress={() => router.push('/contes')} accessibilityLabel={t('contesOpen')}>
+          <Row style={{ flexWrap: 'wrap' }}>
+            <Ionicons name="moon-outline" size={20} color={colors.primary} />
+            <H3 style={{ flex: 1 }}>{t('contesTitle')}</H3>
+            <DialectBadge label={t('reviewAi')} tone="warn" />
+          </Row>
+          <Muted>{t('contesIntro')}</Muted>
+          <Muted>{EPISODES.length} · {t('contesOpen')} →</Muted>
         </Card>
       ) : null}
 

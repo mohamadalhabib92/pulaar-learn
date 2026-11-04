@@ -1,5 +1,5 @@
 import { LESSONS, SOURCE } from './lessons';
-import { BUNDLED } from './recordings';
+import { BUNDLED, BUNDLED_NOV } from './recordings';
 
 /**
  * Packs séparés. Le contenu des leçons et des MP3 n’est pas dupliqué ici :
@@ -7,8 +7,9 @@ import { BUNDLED } from './recordings';
  * Le pack Gambie est vide dans ce dépôt : aucune leçon n’est inventée.
  */
 export type DialectId = 'mr' | 'gm' | 'sn' | 'a_valider';
-export type ReviewStatus = 'a_completer' | 'relu' | 'valide_natif';
-export type PackId = 'gambia' | 'mauritania' | 'uploads';
+/** a_relire : texte pulaar généré ou rédigé avec une IA, à relire par un locuteur natif (jamais « validé »). */
+export type ReviewStatus = 'a_completer' | 'a_relire' | 'relu' | 'valide_natif';
+export type PackId = 'gambia' | 'mauritania' | 'uploads' | 'uploads_nov' | 'contes';
 export type PackFilter = 'all' | PackId;
 
 export type Provenance = {
@@ -64,6 +65,37 @@ export const UPLOADS_PROVENANCE: Provenance = {
   review: 'a_completer',
 };
 
+export const UPLOADS_NOV_PROVENANCE: Provenance = {
+  dialect: 'a_valider',
+  flag: '',
+  dialectLabel: { fr: DIALECTS.a_valider.fr, en: DIALECTS.a_valider.en },
+  source: { fr: 'Upload Mohamed — 03.11.2026 (titres à confirmer)', en: 'Mohamed upload — 2026-11-03 (titles to be confirmed)' },
+  speaker: null,
+  speakerNote,
+  license: {
+    fr: 'Fichiers fournis par Mohamed — licence à valider',
+    en: 'Files provided by Mohamed — license to be validated',
+  },
+  review: 'a_completer',
+};
+
+export const CONTES_PROVENANCE: Provenance = {
+  dialect: 'a_valider',
+  flag: '',
+  dialectLabel: { fr: DIALECTS.a_valider.fr, en: DIALECTS.a_valider.en },
+  source: {
+    fr: 'Méthode de Mohamed (03.11.2026) — textes rédigés avec une IA',
+    en: 'Mohamed’s method (2026-11-03) — texts drafted with AI',
+  },
+  speaker: null,
+  speakerNote,
+  license: {
+    fr: 'Textes de la famille — lettres pulaar d’après Taro CP (CC BY 4.0 IGO)',
+    en: 'Family texts — Pulaar letters after Taro CP (CC BY 4.0 IGO)',
+  },
+  review: 'a_relire',
+};
+
 export const GAMBIA_PROVENANCE: Provenance = {
   dialect: 'gm',
   flag: DIALECTS.gm.flag,
@@ -107,6 +139,23 @@ export const PACKS: {
     recordingIds: BUNDLED.map((r) => r.id),
     provenance: UPLOADS_PROVENANCE,
   },
+  {
+    id: 'uploads_nov',
+    flag: '',
+    name: { fr: 'Uploads Mohamed — 03.11.2026', en: 'Mohamed uploads — 2026-11-03' },
+    lessonIds: [],
+    recordingIds: BUNDLED_NOV.map((r) => r.id),
+    provenance: UPLOADS_NOV_PROVENANCE,
+  },
+  {
+    id: 'contes',
+    flag: '',
+    name: { fr: 'Contes pour enfants', en: 'Children’s stories' },
+    // Les épisodes vivent dans contes.ts (format à 7 parties), pas dans LESSONS.
+    lessonIds: [],
+    recordingIds: [],
+    provenance: CONTES_PROVENANCE,
+  },
 ];
 
 export const packById = (id: PackId) => PACKS.find((p) => p.id === id)!;
@@ -115,6 +164,7 @@ export const provenanceForLesson = (_lessonId: string): Provenance => MAURITANIA
 
 export const reviewLabelKey = {
   a_completer: 'reviewTodo',
+  a_relire: 'reviewAi',
   relu: 'reviewRead',
   valide_natif: 'reviewNative',
 } as const;

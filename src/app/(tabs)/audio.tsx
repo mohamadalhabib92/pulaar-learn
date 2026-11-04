@@ -5,8 +5,8 @@ import { RecRow } from '../../components/RecRow';
 import { ProvenanceCard } from '../../components/ProvenanceCard';
 import { Body, Button, Card, DialectBadge, EmptyState, H1, H2, Muted, Row, Screen } from '../../components/ui';
 import { findLesson } from '../../data/lessons';
-import { UPLOADS_PROVENANCE } from '../../data/packs';
-import { BUNDLED } from '../../data/recordings';
+import { UPLOADS_NOV_PROVENANCE, UPLOADS_PROVENANCE } from '../../data/packs';
+import { BUNDLED, BUNDLED_NOV } from '../../data/recordings';
 import { useI18n } from '../../lib/i18n';
 import { appStore } from '../../lib/store';
 import { colors, space } from '../../theme';
@@ -53,6 +53,23 @@ export default function AudioTab() {
         );
       })}
 
+      <Row style={{ justifyContent: 'space-between', flexWrap: 'wrap', marginTop: space.sm }}>
+        <H2 style={{ flex: 1 }}>{t('packUploadsNov')}</H2>
+        <DialectBadge label={UPLOADS_NOV_PROVENANCE.dialectLabel[lang]} tone="warn" />
+      </Row>
+      <Muted>{t('uploadsNovText')}</Muted>
+      {BUNDLED_NOV.map((r) => (
+        <RecRow
+          key={r.id}
+          id={r.id}
+          title={r.title[lang]}
+          sub={t('titleToConfirm')}
+          durationS={r.durationS}
+          badge={s.transcripts[r.id] ? undefined : t('toComplete')}
+          listened={s.listened.includes(r.id)}
+        />
+      ))}
+
       <Card style={{ gap: space.sm, borderStyle: 'dashed' }}>
         <Row style={{ flexWrap: 'wrap' }}>
           <H2 style={{ flex: 1 }}>{t('nativePack')}</H2>
@@ -61,6 +78,7 @@ export default function AudioTab() {
         <Muted>{t('nativePackText')}</Muted>
       </Card>
       <ProvenanceCard provenance={UPLOADS_PROVENANCE} />
+      <ProvenanceCard provenance={UPLOADS_NOV_PROVENANCE} />
     </Screen>
   );
 }
