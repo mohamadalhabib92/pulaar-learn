@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { BootFallback, BootSkeleton } from '../components/Boot';
 import { AppErrorBoundary } from '../components/ErrorBoundary';
+import { FeedbackProvider } from '../components/motion';
 import { I18nProvider } from '../lib/i18n';
 import { initCrashReporting } from '../lib/crash';
 import { FontProvider } from '../lib/fonts';
@@ -16,7 +17,7 @@ function Gate({ children }: { children: React.ReactNode }) {
     return <BootFallback onRetry={() => appStore.retryHydration()} onOffline={() => appStore.continueOffline()} />;
   }
   if (status !== 'ready' && status !== 'offline') return <BootSkeleton />;
-  return <>{children}</>;
+  return <FeedbackProvider>{children}</FeedbackProvider>;
 }
 
 export default function RootLayout() {

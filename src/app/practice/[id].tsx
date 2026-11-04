@@ -3,6 +3,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { BackBar } from '../../components/BackBar';
+import { haptic } from '../../components/haptics';
+import { useFeedback } from '../../components/motion';
 import { RecPlayer } from '../../components/RecPlayer';
 import { Body, Button, Card, EmptyState, H1, H2, Muted, ProgressBar, PulaarText, Row, Screen } from '../../components/ui';
 import { findLesson } from '../../data/lessons';
@@ -25,6 +27,7 @@ export default function Practice() {
   const [picked, setPicked] = useState<string | null>(null);
   const [correct, setCorrect] = useState(0);
   const [done, setDone] = useState<{ pct: number; xp: number } | null>(null);
+  const { celebrate } = useFeedback();
 
   if (!lesson || !qs.length)
     return (
@@ -70,6 +73,8 @@ export default function Practice() {
   const choose = (o: string) => {
     if (answered) return;
     setPicked(o);
+    // Retour tactile : réussite nette, erreur douce (jamais punitive).
+    haptic(o === q.answer ? 'success' : 'warning');
     if (o === q.answer) setCorrect((c) => c + 1);
   };
   const next = () => {
@@ -83,6 +88,14 @@ export default function Practice() {
     if (isBoss) finishBoss(pct, questEnabled ? xp : 0);
     else finishPractice(lesson.id, pct, questEnabled ? xp : 0);
     setDone({ pct, xp });
+    if (pct >= 80) {
+      celebrate({
+        title: isBoss ? t('celebrateBoss') : t('celebrateLesson'),
+        subtitle: t('celebrateSub', { pct }),
+        icon: isBoss ? 'trophy' : 'ribbon',
+        tone: isBoss ? 'gold' : 'success',
+      });
+    }
   };
 
   return (
