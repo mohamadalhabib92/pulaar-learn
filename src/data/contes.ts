@@ -302,7 +302,7 @@ const bojel: Episode = {
   story: {
     pu: [
       'Ñalnde wootere, ladde fof yoori. Ndiyam alaa. Kullel fof ina ɗomka.',
-      'Bojel, lekki mawki yiyi. Les lekki ki, ndiyam ina woodi ! Bojel weltii.',
+      'Bojel yiyi lekki mawki. Les lekki ki, ndiyam ina woodi ! Bojel weltii.',
       'Bojel noddi sehilaaɓe makko fof. Ɓe ngarii, ɓe njari ndiyam, ɓe ceyii.',
       "Bojel wi'i : Feccude ko moƴƴi. Waalee e jam !",
     ],
@@ -327,13 +327,57 @@ const bojel: Episode = {
   reviewNotes: [
     'Texte pulaar entièrement rédigé avec une IA : relecture par un locuteur natif nécessaire.',
     'Corrigé par Mohamed le 04.11.2026, toujours à relire : « Ɓe ngarii, ɓe njari ndiyam » (ils vinrent, ils burent l’eau), au lieu de « ɓe njari, ɓe njari ndiyam ».',
-    '« Bojel, lekki mawki yiyi » : tournure à vérifier.',
+    'Corrigé par Mohamed le 04.11.2026, toujours à relire : « Bojel yiyi lekki mawki » (ordre normal des mots), au lieu de « Bojel, lekki mawki yiyi ».',
     'Version française complète à écrire (seul un résumé est fourni).',
     'Les colonnes arabe et bärndütsch du vocabulaire ont été ajoutées à l’intégration : à relire.',
   ],
 };
 
-export const EPISODES: Episode[] = [ch1, ch2, bojel];
+const ch3: Episode = {
+  id: 'conte-v1-ch3',
+  kind: 'serie',
+  volume: 1,
+  chapter: 3,
+  title: { fr: 'Les couleurs en Suisse', pu: 'Ahmad, Ibrahim e Kiki : noone ɗee' },
+  worlds: ['suisse', 'etoiles'],
+  minutes: '2',
+  moral: null,
+  review: 'a_relire',
+  aiGenerated: true,
+  origin: 'METHODE-CONTES.md de Mohamed (04.11.2026)',
+  story: {
+    pu: [
+      "Ñalnde wootere, Bilal Ciilal wi'i : Ngaree, en njahen Suwis ! Ahmad e Ibrahim ceyii.",
+      'Ɓe njehi e ngaska Suwis. Kiki Waandu ina ɗoon, ina jala.',
+      "Kiki wi'i : Grüessech, sehilaaɓe am ! Ndaaree ngal nagge. Nagge nge ko baleeje e raneeje.",
+      "Ibrahim wi'i : Baleejo ! Raneejo ! O jali.",
+      "Kiki hokki Ahmad piindi bodeeri. Ahmad wi'i : Ɗum ko bodeejo ! A jaaraama, Kiki !",
+      "Noor ari, ina jalba e kammu. Noor wi'i : Ahmad, a anndii noone ɗee : bodeejo, baleejo, raneejo !",
+      'Ɓe fof ɓe ceyii, ɓe ngami.',
+      "Bilal wi'i : Jam tan, sehilaaɓe am. Waalee e jam !",
+    ],
+    fr: ['Bilal emmène les enfants en Suisse ; Kiki montre une vache noire et blanche et donne une fleur rouge à Ahmad. Trois couleurs : bodeejo (rouge), baleejo (noir), raneejo (blanc).'],
+  },
+  vocab: null,
+  letters: null,
+  dialogue: null,
+  games: null,
+  song: null,
+  parents: null,
+  reviewNotes: [
+    'Texte pulaar entièrement rédigé avec une IA : relecture par un locuteur natif nécessaire.',
+    'Fleur = « piindi » (d’après les dictionnaires Niang/Hippocrene et peeral/Oumar Bah) : à confirmer.',
+    'Accord « piindi bodeeri » (adjectif de couleur avec la classe de « piindi ») : à vérifier.',
+    '« Ndaaree ngal nagge » : « nagge » est de la classe nge, « ngal » semble ne pas s’accorder (nagge nge ?) : à vérifier.',
+    '« Nagge nge ko baleeje e raneeje » : accord des couleurs avec la classe nge : à vérifier.',
+    '« Ɓe njehi e ngaska Suwis » : « njehi » (le Ch. 2 dit « njahi ») et « ngaska » (souvent « trou ») pour la montagne ou le pays : à vérifier.',
+    '« noone ɗee » pour « les couleurs » et « ɓe ngami » (ils dansèrent) : formes à vérifier.',
+    'Version française complète à écrire (seul un résumé est fourni).',
+    'Vocabulaire, lettres du jour, dialogue, mini-jeux, chanson et coin des parents : à écrire selon le format.',
+  ],
+};
+
+export const EPISODES: Episode[] = [ch1, ch2, ch3, bojel];
 export const findEpisode = (id: string) => EPISODES.find((e) => e.id === id);
 
 /** Nombre de sections renseignées sur les 7 du format. */

@@ -60,3 +60,20 @@ test('corrections de Mohamed du 04.11.2026 appliquées (toujours à relire)', ()
   assert.match(body, /Ɓe ngarii, ɓe njari ndiyam/);
   for (const e of EPISODES) assert.equal(e.review, 'a_relire');
 });
+
+test('Ch. 3 présent, 7 parties, seule l’histoire est remplie, à relire', () => {
+  const ch3 = EPISODES.find((e) => e.id === 'conte-v1-ch3');
+  assert.ok(ch3);
+  for (const k of SECTION_ORDER) assert.ok(k in ch3, k);
+  assert.equal(filledSections(ch3), 1);
+  for (const k of ['vocab', 'letters', 'dialogue', 'games', 'song', 'parents']) assert.equal(ch3[k], null, k);
+  assert.equal(ch3.review, 'a_relire');
+  assert.match(ch3.story.pu.at(-1), /Waalee e jam/);
+  assert.ok(ch3.reviewNotes.some((n) => /piindi/.test(n)) && ch3.reviewNotes.some((n) => /bodeeri/.test(n)));
+});
+
+test('Bojel : nouvel ordre des mots présent, ancien absent hors notes', () => {
+  const body = JSON.stringify(EPISODES.map(({ reviewNotes, ...e }) => e));
+  assert.match(body, /Bojel yiyi lekki mawki/);
+  assert.ok(!/Bojel, lekki mawki yiyi/.test(body));
+});
