@@ -42,3 +42,21 @@ test('Taro CP : licence et attribution présentes, lettres des contes dans la pr
   const all = new Set(TARO_PROGRESSION.flatMap((s) => s.letters));
   for (const e of EPISODES) for (const l of e.letters?.pulaar ?? []) assert.ok(all.has(l), `${e.id} : lettre ${l}`);
 });
+
+test('corrections de Mohamed du 04.11.2026 appliquées (toujours à relire)', () => {
+  const words = Object.fromEntries(EPISODES.flatMap((e) => (e.vocab ?? []).flatMap((g) => g.words)).map((w) => [w.key, w]));
+  assert.equal(words['Chameau'].pu, 'Ngelooba');
+  assert.equal(words['Gazelle'].pu, 'Lella');
+  assert.equal(words['Faucon'].pu, 'Ciilal');
+  assert.equal(words['Grand frère'].pu, 'Mawniraaɗo');
+  assert.equal(words['Petit frère'].pu, 'Miñiraaɗo');
+  assert.equal(words['Grand-père'].pu, 'Taaniraaɗo');
+  assert.equal(words['Bonjour'].be, 'Grüessech');
+  assert.equal(words['Vache'].be, 'Chue');
+  // Hors notes de relecture, plus aucune ancienne forme.
+  const body = JSON.stringify(EPISODES.map(({ reviewNotes, ...e }) => e));
+  assert.ok(!/Njamdi|Loopo|Buutuuru|Mawniraawo|Grüezi|Chuei|ɓe njari, ɓe njari/i.test(body));
+  assert.match(body, /Binta Lella/);
+  assert.match(body, /Ɓe ngarii, ɓe njari ndiyam/);
+  for (const e of EPISODES) assert.equal(e.review, 'a_relire');
+});
