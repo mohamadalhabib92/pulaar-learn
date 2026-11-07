@@ -33,7 +33,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test src/lib/persistCore.test.mjs src/lib/preserve.test.mjs src/data/contes.test.mjs scripts/native-deps.test.mjs",
+    "test": "node --experimental-strip-types --test src/lib/persistCore.test.mjs src/lib/preserve.test.mjs src/lib/localDataUi.test.mjs src/data/contes.test.mjs scripts/native-deps.test.mjs",
     "check": "node scripts/check-secrets.mjs",
     "export:web": "expo export -p web && node scripts/pwa.mjs",
     "icons": "python3 scripts/make-icons.py"

@@ -20,7 +20,7 @@ type Options<T> = {
  * La clé ne change pas. La lecture a un délai max ; ensuite l’UI propose
  * « Réessayer » ou « Continuer hors ligne ».
  * Aucune écriture avant un getItem compatible. Un fichier illisible ou trop récent
- * reste sur le disque et s’affiche avec son texte brut.
+ * reste sur le disque. L’écran ne le montre qu’après une demande explicite.
  */
 export function createPersistedStore<T extends object>(key: string, initial: T, timeoutMsOrOpts: number | Options<T> = BOOT_TIMEOUT_MS) {
   const opts: Options<T> = typeof timeoutMsOrOpts === 'number' ? { timeoutMs: timeoutMsOrOpts } : timeoutMsOrOpts;
@@ -36,6 +36,7 @@ export function createPersistedStore<T extends object>(key: string, initial: T, 
     set: core.set,
     reset: core.reset,
     deleteStored: core.deleteStored,
+    discardUnreadable: core.discardUnreadable,
     signOut: core.signOut,
     exportRaw: core.exportRaw,
     getPreserve: core.getPreserve,

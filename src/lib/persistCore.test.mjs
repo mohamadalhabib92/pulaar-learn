@@ -345,3 +345,23 @@ test('l’effacement de la clé exige la phrase exacte et n’est pas appelé pa
   assert.equal(JSON.parse(mem.data['pulaar:v1']).xp, 2);
   assert.equal(JSON.parse(mem.data['pulaar:v1']).schemaVersion, 1);
 });
+
+test('un fichier illisible ne part qu’avec discardUnreadable et la phrase, pas avec deleteStored', async () => {
+  const future = '{"schemaVersion":2,"note":"enfant"}';
+  const mem = memoryStorage({ 'pulaar:v1': future });
+  const store = createPersistedStoreCore('pulaar:v1', blank(), {
+    timeoutMs: 40,
+    saveDelayMs: 0,
+    storage: mem.storage,
+  });
+  mem.release(future);
+  await tick();
+  assert.deepEqual(store.deleteStored(DELETE_CONFIRMATION), { deleted: false, reason: 'locked' });
+  assert.deepEqual(store.discardUnreadable('non'), { deleted: false, reason: 'confirmation' });
+  await tick();
+  assert.equal(mem.data['pulaar:v1'], future);
+  assert.deepEqual(store.discardUnreadable(DELETE_CONFIRMATION), { deleted: true, reason: 'deleted' });
+  await tick();
+  assert.equal(mem.writes.filter((w) => w.op === 'remove').length, 1);
+  assert.equal(store.exportRaw() == null || !String(store.exportRaw()).includes('enfant'), true);
+});

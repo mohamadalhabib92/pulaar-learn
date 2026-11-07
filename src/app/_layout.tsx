@@ -7,17 +7,21 @@ import { AppErrorBoundary } from '../components/ErrorBoundary';
 import { I18nProvider } from '../lib/i18n';
 import { initCrashReporting } from '../lib/crash';
 import { FontProvider } from '../lib/fonts';
+import { DELETE_CONFIRMATION } from '../lib/preserve';
 import { appStore } from '../lib/store';
 import { colors } from '../theme';
 
 function Gate({ children }: { children: React.ReactNode }) {
   const status = appStore.useBoot();
-  const preserve = appStore.usePreserve();
+  const reason = appStore.usePreserve().reason;
   if (status === 'incompatible') {
     return (
       <BootIncompatible
-        reason={preserve.reason}
-        raw={preserve.raw}
+        reason={reason}
+        readRaw={() => appStore.exportRaw()}
+        onPlan={(plan) => {
+          if (plan.removeUnreadableKey) appStore.discardUnreadable(DELETE_CONFIRMATION);
+        }}
         onRetry={() => appStore.retryHydration()}
         onOffline={() => appStore.continueOffline()}
       />

@@ -161,8 +161,8 @@ export function createPersistedStoreCore<T extends object>(key: string, initial:
       return true;
     },
     /**
-     * Effacement volontaire de la clé compatible. Refusé sans la phrase exacte,
-     * et refusé tant que le fichier n’est pas une sauvegarde compatible déjà lue.
+     * Effacement volontaire d’une clé déjà lue comme compatible.
+     * Refusé sans la phrase exacte. Un fichier illisible passe par discardUnreadable.
      */
     deleteStored(confirm: string) {
       if (confirm !== DELETE_CONFIRMATION) return { deleted: false, reason: 'confirmation' as const };
@@ -176,6 +176,26 @@ export function createPersistedStoreCore<T extends object>(key: string, initial:
       dirty = false;
       storage.removeItem(key).catch(() => undefined);
       emit();
+      return { deleted: true, reason: 'deleted' as const };
+    },
+    /**
+     * Effacement volontaire d’un fichier qui n’a pas pu être ouvert.
+     * La phrase est la même que celle affichée à l’écran. deleteStored ne le fait pas.
+     */
+    discardUnreadable(confirm: string) {
+      if (confirm !== DELETE_CONFIRMATION) return { deleted: false, reason: 'confirmation' as const };
+      if (preserve.kind !== 'malformed' && preserve.kind !== 'incompatible') {
+        return { deleted: false, reason: 'not-unreadable' as const };
+      }
+      writeGen += 1;
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = null;
+      storage.removeItem(key).catch(() => undefined);
+      preserve = { kind: 'empty', raw: null, reason: null };
+      state = { ...initial };
+      dirty = false;
+      storageReady = true;
+      settle('ready');
       return { deleted: true, reason: 'deleted' as const };
     },
     /** Pas de compte dans cette application. Ne supprime rien. */

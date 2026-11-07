@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
-import { Linking, Switch, Text } from 'react-native';
-import { Body, Button, Card, Chip, H1, H3, Muted, Row, Screen } from '../../components/ui';
+import React from 'react';
+import { Linking, Switch } from 'react-native';
+import { LocalDataActions } from '../../components/LocalDataActions';
+import { Body, Card, Chip, H1, H3, Muted, Row, Screen } from '../../components/ui';
 import { SOURCE } from '../../data/lessons';
 import { JANNGU } from '../../data/recordings';
 import { LANGS } from '../../i18n/strings';
-import type { AppState } from '../../lib/store';
+import { deleteImportFile } from '../../lib/audioFiles';
+import type { DeletionPlan } from '../../lib/localDataUi';
 import { useI18n } from '../../lib/i18n';
+import { DELETE_CONFIRMATION, preserveFieldName, preserveMessageKey } from '../../lib/preserve';
+import type { AppState } from '../../lib/store';
 import { appStore, resetProgress } from '../../lib/store';
-import { preserveFieldName, preserveMessageKey } from '../../lib/preserve';
 import { colors, space } from '../../theme';
 
 export default function Settings() {
@@ -16,8 +19,13 @@ export default function Settings() {
   const preserve = appStore.usePreserve();
   const blocked = preserve.kind === 'malformed' || preserve.kind === 'incompatible';
   const field = preserveFieldName(preserve.reason);
-  const [confirm, setConfirm] = useState(false);
-  const [done, setDone] = useState(false);
+  const onPlan = (plan: DeletionPlan) => {
+    if (plan.resetProgress) {
+      resetProgress();
+      return;
+    }
+    void applyFullDelete(plan);
+  };
   return (
     <Screen>
       <H1>{t('settings')}</H1>
@@ -70,26 +78,12 @@ export default function Settings() {
           <H3>{t('bootIncompatibleTitle')}</H3>
           <Body color={colors.muted}>{t('bootIncompatibleText')}</Body>
           <Body>{field ? t(preserveMessageKey(preserve.reason), { field }) : t(preserveMessageKey(preserve.reason))}</Body>
-          <Muted>{t('preserveExport')}</Muted>
-          <Text accessibilityLabel={t('preserveExport')} selectable style={{ color: colors.text }}>
-            {preserve.raw ?? ''}
-          </Text>
         </Card>
       ) : null}
       <Card style={{ gap: space.sm }}>
         <H3>{t('data')}</H3>
         <Muted>{t('dataText')}</Muted>
-        <Button
-          variant={confirm ? 'danger' : 'ghost'}
-          label={confirm ? t('confirmReset') : t('resetProgress')}
-          onPress={() => {
-            if (!confirm) return setConfirm(true);
-            resetProgress();
-            setConfirm(false);
-            setDone(true);
-          }}
-        />
-        {done ? <Muted color={colors.ok}>{t('resetDone')}</Muted> : null}
+        <LocalDataActions readable={!blocked} includeProgressReset readRaw={() => appStore.exportRaw()} onPlan={onPlan} />
       </Card>
       <Card style={{ gap: space.sm }}>
         <H3>{t('phase2')}</H3>
@@ -106,4 +100,13 @@ export default function Settings() {
       </Card>
     </Screen>
   );
+}
+
+async function applyFullDelete(plan: DeletionPlan) {
+  if (plan.deleteListedAudio) {
+    const listed = appStore.get().imports.slice();
+    for (const item of listed) await deleteImportFile(item);
+  }
+  if (plan.removeReadableKey) appStore.deleteStored(DELETE_CONFIRMATION);
+  if (plan.removeUnreadableKey) appStore.discardUnreadable(DELETE_CONFIRMATION);
 }
