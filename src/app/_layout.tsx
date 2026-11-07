@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { BootFallback, BootSkeleton } from '../components/Boot';
+import { BootFallback, BootIncompatible, BootSkeleton } from '../components/Boot';
 import { AppErrorBoundary } from '../components/ErrorBoundary';
 import { I18nProvider } from '../lib/i18n';
 import { initCrashReporting } from '../lib/crash';
@@ -12,6 +12,17 @@ import { colors } from '../theme';
 
 function Gate({ children }: { children: React.ReactNode }) {
   const status = appStore.useBoot();
+  const preserve = appStore.usePreserve();
+  if (status === 'incompatible') {
+    return (
+      <BootIncompatible
+        reason={preserve.reason}
+        raw={preserve.raw}
+        onRetry={() => appStore.retryHydration()}
+        onOffline={() => appStore.continueOffline()}
+      />
+    );
+  }
   if (status === 'timedOut') {
     return <BootFallback onRetry={() => appStore.retryHydration()} onOffline={() => appStore.continueOffline()} />;
   }

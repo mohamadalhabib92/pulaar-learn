@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Linking, Switch } from 'react-native';
+import { Linking, Switch, Text } from 'react-native';
 import { Body, Button, Card, Chip, H1, H3, Muted, Row, Screen } from '../../components/ui';
 import { SOURCE } from '../../data/lessons';
 import { JANNGU } from '../../data/recordings';
@@ -7,11 +7,15 @@ import { LANGS } from '../../i18n/strings';
 import type { AppState } from '../../lib/store';
 import { useI18n } from '../../lib/i18n';
 import { appStore, resetProgress } from '../../lib/store';
+import { preserveFieldName, preserveMessageKey } from '../../lib/preserve';
 import { colors, space } from '../../theme';
 
 export default function Settings() {
   const { t, lang, setLang } = useI18n();
   const s = appStore.useStore();
+  const preserve = appStore.usePreserve();
+  const blocked = preserve.kind === 'malformed' || preserve.kind === 'incompatible';
+  const field = preserveFieldName(preserve.reason);
   const [confirm, setConfirm] = useState(false);
   const [done, setDone] = useState(false);
   return (
@@ -61,6 +65,17 @@ export default function Settings() {
           ))}
         </Row>
       </Card>
+      {blocked ? (
+        <Card style={{ gap: space.sm }}>
+          <H3>{t('bootIncompatibleTitle')}</H3>
+          <Body color={colors.muted}>{t('bootIncompatibleText')}</Body>
+          <Body>{field ? t(preserveMessageKey(preserve.reason), { field }) : t(preserveMessageKey(preserve.reason))}</Body>
+          <Muted>{t('preserveExport')}</Muted>
+          <Text accessibilityLabel={t('preserveExport')} selectable style={{ color: colors.text }}>
+            {preserve.raw ?? ''}
+          </Text>
+        </Card>
+      ) : null}
       <Card style={{ gap: space.sm }}>
         <H3>{t('data')}</H3>
         <Muted>{t('dataText')}</Muted>
