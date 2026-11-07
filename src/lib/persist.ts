@@ -2,8 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 import { BOOT_TIMEOUT_MS } from '../theme';
 import { createPersistedStoreCore, type BootStatus, type KeyValueStore } from './persistCore';
+import type { PreserveView } from './preserve';
 
 export type { BootStatus };
+export type { PreserveView };
 
 type Options<T> = {
   timeoutMs?: number;
@@ -17,8 +19,8 @@ type Options<T> = {
  * Store persistant (AsyncStorage, localStorage sur le web).
  * La clé ne change pas. La lecture a un délai max ; ensuite l’UI propose
  * « Réessayer » ou « Continuer hors ligne ».
- * Aucune écriture avant un getItem réussi : sur main, le délai de 2,5 s
- * considérait la lecture comme vide puis le setItem suivant écrasait les imports.
+ * Aucune écriture avant un getItem compatible. Un fichier illisible ou trop récent
+ * reste sur le disque. L’écran ne le montre qu’après une demande explicite.
  */
 export function createPersistedStore<T extends object>(key: string, initial: T, timeoutMsOrOpts: number | Options<T> = BOOT_TIMEOUT_MS) {
   const opts: Options<T> = typeof timeoutMsOrOpts === 'number' ? { timeoutMs: timeoutMsOrOpts } : timeoutMsOrOpts;
@@ -33,6 +35,11 @@ export function createPersistedStore<T extends object>(key: string, initial: T, 
     get: core.get,
     set: core.set,
     reset: core.reset,
+    deleteStored: core.deleteStored,
+    discardUnreadable: core.discardUnreadable,
+    signOut: core.signOut,
+    exportRaw: core.exportRaw,
+    getPreserve: core.getPreserve,
     hydration: core.hydration,
     retryHydration: core.retryHydration,
     continueOffline: core.continueOffline,
@@ -41,6 +48,9 @@ export function createPersistedStore<T extends object>(key: string, initial: T, 
     },
     useBoot(): BootStatus {
       return useSyncExternalStore(core.subscribe, core.getStatus, core.getStatus);
+    },
+    usePreserve(): PreserveView {
+      return useSyncExternalStore(core.subscribe, core.getPreserve, core.getPreserve);
     },
     useHydrated(): boolean {
       const ready = () => {

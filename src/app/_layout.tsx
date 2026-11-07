@@ -2,16 +2,31 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { BootFallback, BootSkeleton } from '../components/Boot';
+import { BootFallback, BootIncompatible, BootSkeleton } from '../components/Boot';
 import { AppErrorBoundary } from '../components/ErrorBoundary';
 import { I18nProvider } from '../lib/i18n';
 import { initCrashReporting } from '../lib/crash';
 import { FontProvider } from '../lib/fonts';
+import { DELETE_CONFIRMATION } from '../lib/preserve';
 import { appStore } from '../lib/store';
 import { colors } from '../theme';
 
 function Gate({ children }: { children: React.ReactNode }) {
   const status = appStore.useBoot();
+  const reason = appStore.usePreserve().reason;
+  if (status === 'incompatible') {
+    return (
+      <BootIncompatible
+        reason={reason}
+        readRaw={() => appStore.exportRaw()}
+        onPlan={(plan) => {
+          if (plan.removeUnreadableKey) appStore.discardUnreadable(DELETE_CONFIRMATION);
+        }}
+        onRetry={() => appStore.retryHydration()}
+        onOffline={() => appStore.continueOffline()}
+      />
+    );
+  }
   if (status === 'timedOut') {
     return <BootFallback onRetry={() => appStore.retryHydration()} onOffline={() => appStore.continueOffline()} />;
   }
