@@ -77,3 +77,13 @@ test('Bojel : nouvel ordre des mots présent, ancien absent hors notes', () => {
   assert.match(body, /Bojel yiyi lekki mawki/);
   assert.ok(!/Bojel, lekki mawki yiyi/.test(body));
 });
+
+test('Ch. 3 : corrections du 04.11 (norɗuuli, leydi, njahi, nagge nge, daneejo)', () => {
+  const ch3 = EPISODES.find((e) => e.id === 'conte-v1-ch3');
+  assert.equal(ch3.title.pu, 'Ahmad, Ibrahim e Kiki : norɗuuli');
+  assert.equal(ch3.review, 'a_relire');
+  const pu = ch3.story.pu.join('\n');
+  for (const w of ['leydi Suwis', 'njahi', 'nagge nge', 'norɗuuli', 'daneejo']) assert.ok(pu.includes(w), w);
+  const body = JSON.stringify(EPISODES.map(({ reviewNotes, ...e }) => e));
+  for (const old of ['ngaska', 'njehi', 'ngal nagge', 'noone ɗee', 'raneej']) assert.ok(!body.includes(old), old);
+});
