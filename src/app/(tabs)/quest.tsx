@@ -1,16 +1,36 @@
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { QuestStrip } from '../../components/Quest';
 import { Body, Button, Card, EmptyState, H1, H2, H3, Muted, Screen } from '../../components/ui';
 import { LESSONS } from '../../data/lessons';
 import { useI18n } from '../../lib/i18n';
 import { appStore, BADGES, lessonStatus } from '../../lib/store';
-import { colors, radius, space } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 export default function Quest() {
   const { t, lang } = useI18n();
+  const { colors, radius, space, glassChrome } = useVerre();
   const s = appStore.useStore();
+  const styles = useMemo(() => {
+    const chrome = glassChrome(colors);
+    return StyleSheet.create({
+      grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+      badge: {
+        width: '31%',
+        flexGrow: 1,
+        minHeight: 96,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
+        backgroundColor: chrome.backgroundColor,
+        borderRadius: radius.md,
+        padding: space.md,
+        borderWidth: 1,
+        borderColor: chrome.borderColor,
+      },
+    });
+  }, [colors, radius, space, glassChrome]);
   if (!s.questEnabled)
     return (
       <Screen>
@@ -40,8 +60,8 @@ export default function Quest() {
         {BADGES.map((b) => {
           const on = s.badges.includes(b.id);
           return (
-            <View key={b.id} style={[styles.badge, !on && { opacity: 0.4 }]} accessibilityLabel={`${b[lang]}${on ? '' : ' (verrouillé)'}`}>
-              <Body style={{ fontSize: 30 }}>{on ? b.icon : '🔒'}</Body>
+            <View key={b.id} style={styles.badge} accessibilityLabel={on ? b[lang] : `${b[lang]}, ${t('badgeLocked')}`}>
+              <Body style={{ fontSize: 30, opacity: on ? 1 : 0.45 }}>{on ? b.icon : '🔒'}</Body>
               <Muted center>{b[lang]}</Muted>
             </View>
           );
@@ -50,8 +70,3 @@ export default function Quest() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  badge: { width: '31%', flexGrow: 1, alignItems: 'center', gap: 4, backgroundColor: colors.surface, borderRadius: radius.md, padding: space.md, borderWidth: 1, borderColor: colors.border },
-});

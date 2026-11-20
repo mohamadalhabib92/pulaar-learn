@@ -9,8 +9,8 @@ import {
   type DeletionPlan,
   type LocalDataEvent,
 } from '../lib/localDataUi';
-import { colors, radius, space } from '../theme';
-import { Body, Button, Muted } from './ui';
+import { useVerre } from '../lib/verre';
+import { Body, Button, Muted, useInputStyle } from './ui';
 
 /**
  * Export, réinitialisation et effacement.
@@ -28,6 +28,8 @@ export function LocalDataActions({
   onPlan: (plan: DeletionPlan) => void;
 }) {
   const { t } = useI18n();
+  const { colors, space } = useVerre();
+  const input = useInputStyle();
   const [ui, setUi] = useState(initialLocalDataUi);
   const dispatch = (event: LocalDataEvent) => {
     const step = reduceLocalData(ui, event, { readable });
@@ -85,14 +87,7 @@ export function LocalDataActions({
             autoCapitalize="none"
             autoCorrect={false}
             accessibilityLabel={t('deletePhraseLabel')}
-            style={{
-              minHeight: 44,
-              borderWidth: 1,
-              borderColor: colors.border,
-              borderRadius: radius.sm,
-              paddingHorizontal: space.sm,
-              color: colors.text,
-            }}
+            style={input}
           />
           <Button variant="danger" label={t('confirmDeleteAll')} onPress={() => dispatch({ type: 'confirm-delete' })} />
           <Button variant="secondary" label={t('cancelData')} onPress={() => dispatch({ type: 'cancel' })} />

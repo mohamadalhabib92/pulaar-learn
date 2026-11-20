@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useI18n } from '../lib/i18n';
 import type { DeletionPlan } from '../lib/localDataUi';
 import { preserveFieldName, preserveMessageKey } from '../lib/preserve';
-import { colors, space } from '../theme';
+import { useVerre } from '../lib/verre';
 import { LocalDataActions } from './LocalDataActions';
 import { Body, Button, H1, Muted, Screen, Skeleton } from './ui';
 
@@ -24,6 +24,7 @@ export function BootSkeleton() {
 /** Après 8 s sans stockage local : les leçons (fichiers de l’app) restent disponibles. */
 export function BootFallback({ onRetry, onOffline }: { onRetry: () => void; onOffline: () => void }) {
   const { t } = useI18n();
+  const { colors, space } = useVerre();
   return (
     <Screen scroll={false}>
       <View style={{ gap: space.md, paddingTop: space.xl }}>
@@ -51,6 +52,7 @@ export function BootIncompatible({
   onOffline: () => void;
 }) {
   const { t } = useI18n();
+  const { colors, space } = useVerre();
   const field = preserveFieldName(reason);
   return (
     <Screen>

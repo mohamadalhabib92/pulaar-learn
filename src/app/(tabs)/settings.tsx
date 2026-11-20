@@ -11,10 +11,11 @@ import { useI18n } from '../../lib/i18n';
 import { DELETE_CONFIRMATION, preserveFieldName, preserveMessageKey } from '../../lib/preserve';
 import type { AppState } from '../../lib/store';
 import { appStore, resetProgress } from '../../lib/store';
-import { colors, space } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 export default function Settings() {
   const { t, lang, setLang } = useI18n();
+  const { colors, space } = useVerre();
   const s = appStore.useStore();
   const preserve = appStore.usePreserve();
   const blocked = preserve.kind === 'malformed' || preserve.kind === 'incompatible';
@@ -45,7 +46,7 @@ export default function Settings() {
             value={s.questEnabled}
             onValueChange={(v) => appStore.set({ questEnabled: v })}
             trackColor={{ true: colors.primary, false: colors.border }}
-            thumbColor={colors.surface}
+            thumbColor={colors.surfaceSolid}
           />
         </Row>
         <Muted>{t('questModeText')}</Muted>

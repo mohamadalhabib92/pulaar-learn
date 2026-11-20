@@ -6,7 +6,8 @@ import { Badge, Body, Button, Card, DialectBadge, EmptyState, H1, H2, H3, Muted,
 import { SERIES, findEpisode, type Episode, type SectionId } from '../../data/contes';
 import { TARO } from '../../data/taro';
 import { useI18n } from '../../lib/i18n';
-import { colors, space } from '../../theme';
+import { space } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 const SEC_KEY: Record<SectionId, 'secStory' | 'secVocab' | 'secLetters' | 'secDialogue' | 'secGames' | 'secSong' | 'secParents'> = {
   story: 'secStory',
@@ -21,6 +22,7 @@ const SEC_KEY: Record<SectionId, 'secStory' | 'secVocab' | 'secLetters' | 'secDi
 export default function EpisodeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, lang } = useI18n();
+  const { colors } = useVerre();
   const e = findEpisode(String(id));
   if (!e)
     return (

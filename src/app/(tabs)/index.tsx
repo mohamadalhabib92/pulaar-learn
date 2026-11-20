@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 import { ProvisionalBanner, QuestStrip } from '../../components/Quest';
 import { Badge, Body, Button, Card, Chip, DialectBadge, H1, H2, H3, Muted, PulaarText, Row, Screen } from '../../components/ui';
@@ -10,11 +10,42 @@ import { BUNDLED, BUNDLED_NOV, WONNOO } from '../../data/recordings';
 import { EPISODES } from '../../data/contes';
 import { useI18n } from '../../lib/i18n';
 import { appStore, lessonStatus } from '../../lib/store';
-import { colors, radius, space } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 export default function Learn() {
   const { t, lang } = useI18n();
+  const { colors, radius, space, relief } = useVerre();
   const s = appStore.useStore();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        hero: {
+          backgroundColor: colors.primaryFill,
+          borderRadius: radius.lg,
+          padding: space.xl,
+          gap: space.xs,
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(255,255,255,0.45)',
+          ...relief(colors, false),
+        },
+        node: {
+          width: 44,
+          height: 44,
+          borderRadius: 22,
+          borderWidth: 2,
+          borderColor: colors.border,
+          backgroundColor: colors.surfaceSolid,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: space.md,
+        },
+        nodeSeen: { borderColor: colors.primary },
+        nodeDone: { backgroundColor: colors.primaryFill, borderColor: colors.primaryFill },
+        line: { flex: 1, width: 2, backgroundColor: colors.border, marginTop: 2, marginBottom: -space.sm - 14 },
+        icon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+      }),
+    [colors, radius, space, relief],
+  );
   const started = Object.keys(s.lessons).length > 0 || s.listened.length > 0;
   const next = LESSONS.find((l) => lessonStatus(s, l.id) !== 'mastered') ?? LESSONS[0];
 
@@ -60,7 +91,7 @@ export default function Learn() {
           return (
             <View key={l.id} style={{ flexDirection: 'row', gap: space.md, alignItems: 'stretch' }}>
               {s.questEnabled ? (
-                <View style={{ alignItems: 'center', width: 36 }}>
+                <View style={{ alignItems: 'center', width: 44 }}>
                   <View style={[styles.node, st === 'mastered' ? styles.nodeDone : st === 'seen' ? styles.nodeSeen : null]}>
                     {st === 'mastered' ? <Ionicons name="checkmark" size={18} color={colors.onPrimary} /> : <Body style={{ fontWeight: '800' }} color={st === 'seen' ? colors.primary : colors.muted}>{l.n}</Body>}
                   </View>
@@ -153,12 +184,3 @@ export default function Learn() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  hero: { backgroundColor: colors.primary, borderRadius: radius.lg, padding: space.xl, gap: space.xs },
-  node: { width: 36, height: 36, borderRadius: 18, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', marginTop: space.md },
-  nodeSeen: { borderColor: colors.primary },
-  nodeDone: { backgroundColor: colors.primary, borderColor: colors.primary },
-  line: { flex: 1, width: 2, backgroundColor: colors.border, marginTop: 2, marginBottom: -space.sm - 14 },
-  icon: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
-});

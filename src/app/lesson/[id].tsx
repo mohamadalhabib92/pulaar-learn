@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BackBar } from '../../components/BackBar';
 import { ProvisionalBanner } from '../../components/Quest';
@@ -13,11 +13,20 @@ import { provenanceForLesson } from '../../data/packs';
 import { bundledForLesson } from '../../data/recordings';
 import { useI18n } from '../../lib/i18n';
 import { appStore, markSeen } from '../../lib/store';
-import { colors, radius, space } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 export default function LessonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, lang } = useI18n();
+  const { colors, radius, space } = useVerre();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        item: { flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg, paddingVertical: space.sm, alignItems: 'center', borderTopWidth: 1, borderTopColor: colors.border, minHeight: 44 },
+        pu: { fontSize: 18, fontWeight: '800', color: colors.primary, minWidth: 110, maxWidth: '45%', borderRadius: radius.sm },
+      }),
+    [colors, radius, space],
+  );
   const s = appStore.useStore();
   const lesson = findLesson(String(id));
 
@@ -88,8 +97,3 @@ export default function LessonScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  item: { flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg, paddingVertical: space.sm, alignItems: 'center', borderTopWidth: 1, borderTopColor: colors.border },
-  pu: { fontSize: 18, fontWeight: '800', color: colors.primary, minWidth: 110, maxWidth: '45%', borderRadius: radius.sm },
-});

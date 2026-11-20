@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { TextInput } from 'react-native';
 import { useI18n } from '../lib/i18n';
 import { setTranscript } from '../lib/store';
-import { colors, radius, space } from '../theme';
-import { Badge, Button, Card, H3, Muted, Row } from './ui';
+import { useVerre } from '../lib/verre';
+import { Badge, Button, Card, H3, Muted, Row, useInputStyle } from './ui';
 
 export function TranscriptEditor({ recId, value }: { recId: string; value: string }) {
   const { t } = useI18n();
+  const { colors, space } = useVerre();
+  const input = useInputStyle();
   const [text, setText] = useState(value);
   const [saved, setSaved] = useState(false);
   useEffect(() => setText(value), [value]);
@@ -27,7 +29,7 @@ export function TranscriptEditor({ recId, value }: { recId: string; value: strin
         }}
         placeholder={t('toComplete')}
         placeholderTextColor={colors.muted}
-        style={{ minHeight: 110, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: space.md, fontSize: 16, color: colors.text, backgroundColor: colors.bg, textAlignVertical: 'top' }}
+        style={[input, { minHeight: 110, textAlignVertical: 'top' }]}
       />
       <Row>
         <Button

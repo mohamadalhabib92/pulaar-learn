@@ -4,10 +4,11 @@ import { BackBar } from '../../components/BackBar';
 import { Badge, Body, Button, Card, H1, H3, Muted, PulaarText, Row, Screen } from '../../components/ui';
 import { TARO, TARO_PROGRESSION } from '../../data/taro';
 import { useI18n } from '../../lib/i18n';
-import { colors, space } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 export default function TaroScreen() {
   const { t, lang } = useI18n();
+  const { colors, space } = useVerre();
   return (
     <Screen>
       <BackBar label={t('back')} />

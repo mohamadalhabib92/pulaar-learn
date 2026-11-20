@@ -3,10 +3,11 @@ import { Tabs } from 'expo-router/js-tabs';
 import React from 'react';
 import { useI18n } from '../../lib/i18n';
 import { appStore } from '../../lib/store';
-import { colors } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 export default function TabsLayout() {
   const { t } = useI18n();
+  const { colors } = useVerre();
   const { questEnabled } = appStore.useStore();
   const icon =
     (name: keyof typeof Ionicons.glyphMap) =>
@@ -19,8 +20,13 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-        tabBarLabelStyle: { fontWeight: '600' },
+        tabBarStyle: {
+          backgroundColor: colors.translucent ? colors.glass : colors.surfaceSolid,
+          borderTopColor: colors.translucent ? colors.glassEdge : colors.border,
+          borderTopWidth: 1,
+        },
+        tabBarLabelStyle: { fontWeight: '700', fontSize: 12 },
+        tabBarItemStyle: { minHeight: 44 },
       }}
     >
       <Tabs.Screen name="index" options={{ title: t('tabLearn'), tabBarIcon: icon('school-outline') }} />

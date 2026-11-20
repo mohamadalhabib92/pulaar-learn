@@ -9,10 +9,11 @@ import { UPLOADS_NOV_PROVENANCE, UPLOADS_PROVENANCE } from '../../data/packs';
 import { BUNDLED, BUNDLED_NOV } from '../../data/recordings';
 import { useI18n } from '../../lib/i18n';
 import { appStore } from '../../lib/store';
-import { colors, space } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 export default function AudioTab() {
   const { t, lang } = useI18n();
+  const { colors, space } = useVerre();
   const s = appStore.useStore();
   const tagLabel = (tag: string) => t(`tag_${tag}` as 'tag_autre');
   return (

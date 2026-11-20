@@ -6,12 +6,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 import { AccessibilityInfo, Animated, Easing, Platform, Pressable, StyleSheet, Text, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
-import { haptic, type HapticKind } from './haptics';
+import { useI18n } from '../lib/i18n';
 import { appStore } from '../lib/store';
-import { colors } from '../theme';
-
-/** Palette Pulaar Learn (noms adaptés pour le kit de mouvement). Or = orange de marque. */
-const __THEME__ = { ...colors, success: colors.ok, accent: '#C77A12' };
+import { useVerre } from '../lib/verre';
+import { haptic, type HapticKind } from './haptics';
 
 const native = Platform.OS !== 'web';
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -84,10 +82,11 @@ export function PressableScale({
   disabled,
   children,
   ...rest
-}: Omit<PressableProps, 'style'> & {
+}: Omit<PressableProps, 'style' | 'children'> & {
   style?: StyleProp<ViewStyle> | ((s: { pressed: boolean }) => StyleProp<ViewStyle>);
   scaleTo?: number;
   hapticKind?: HapticKind | null;
+  children?: ReactNode | ((s: { pressed: boolean }) => ReactNode);
 }) {
   const p = usePressScale(scaleTo);
   const [pressed, setPressed] = useState(false);
@@ -110,9 +109,9 @@ export function PressableScale({
         if (hapticKind) haptic(hapticKind);
         onPress?.(e);
       }}
-      style={[resolved, { transform: [{ scale: p.scale }] }]}
+      style={[resolved, prefersReducedMotion() ? null : { transform: [{ scale: p.scale }] }]}
     >
-      {children as ReactNode}
+      {typeof children === 'function' ? children({ pressed }) : (children as ReactNode)}
     </AnimatedPressable>
   );
 }
@@ -135,6 +134,7 @@ export function FadeIn({ children, delay = 0, distance = 10, style }: { children
 
 /** Bloc squelette : pulsation lente, remplace les indicateurs de chargement. */
 export function Skeleton({ w = '100%', h = 14, r = 8, style }: { w?: number | `${number}%`; h?: number; r?: number; style?: StyleProp<ViewStyle> }) {
+  const { colors } = useVerre();
   const o = useRef(new Animated.Value(0.55)).current;
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -147,15 +147,17 @@ export function Skeleton({ w = '100%', h = 14, r = 8, style }: { w?: number | `$
     loop.start();
     return () => loop.stop();
   }, [o]);
-  return <Animated.View importantForAccessibility="no" style={[{ width: w, height: h, borderRadius: r, backgroundColor: __THEME__.surfaceAlt, opacity: o }, style]} />;
+  return <Animated.View importantForAccessibility="no" style={[{ width: w, height: h, borderRadius: r, backgroundColor: colors.surfaceAlt, opacity: o }, style]} />;
 }
 
 /** Liste squelette (cartes) — à afficher pendant un chargement. */
-export function SkeletonList({ rows = 3, label = 'Chargement…' }: { rows?: number; label?: string }) {
+export function SkeletonList({ rows = 3, label }: { rows?: number; label?: string }) {
+  const { colors } = useVerre();
+  const { t } = useI18n();
   return (
-    <View accessible accessibilityRole="progressbar" accessibilityLabel={label} accessibilityState={{ busy: true }}>
+    <View accessible accessibilityRole="progressbar" accessibilityLabel={label ?? t('loading')} accessibilityState={{ busy: true }}>
       {Array.from({ length: rows }).map((_, i) => (
-        <View key={i} style={[sk.card, { backgroundColor: __THEME__.surface, borderColor: __THEME__.border }]}>
+        <View key={i} style={[sk.card, { backgroundColor: colors.surfaceSolid, borderColor: colors.border }]}>
           <Skeleton w={40} h={40} r={20} />
           <View style={{ flex: 1, gap: 8 }}>
             <Skeleton w={`${70 - i * 8}%` as `${number}%`} h={14} />
@@ -203,6 +205,8 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
 }
 
 function CelebrationView({ c, onDone }: { c: Celebration; onDone: () => void }) {
+  const { colors, glassChrome, relief } = useVerre();
+  const { t } = useI18n();
   const pop = useRef(new Animated.Value(prefersReducedMotion() ? 1 : 0)).current;
   const ring = useRef(new Animated.Value(0)).current;
   const fade = useRef(new Animated.Value(1)).current;
@@ -219,10 +223,17 @@ function CelebrationView({ c, onDone }: { c: Celebration; onDone: () => void }) 
     seq.start(({ finished }) => finished && onDone());
     return () => seq.stop();
   }, [c, pop, ring, fade, onDone]);
-  const accent = c.tone === 'gold' ? __THEME__.accent : __THEME__.success;
+  const accent = c.tone === 'gold' ? colors.accentFill : colors.primaryFill;
+  const ink = c.tone === 'gold' ? colors.accentInk : colors.onPrimary;
+  const chrome = glassChrome(colors);
   return (
-    <Animated.View pointerEvents="box-none" style={[StyleSheet.absoluteFill, cs.wrap, { opacity: fade }]}>
-      <Pressable onPress={onDone} accessibilityRole="button" accessibilityLabel={`${c.title}. Fermer`} style={[cs.card, { backgroundColor: __THEME__.surface, borderColor: __THEME__.border }]}>
+    <Animated.View pointerEvents="box-none" style={[StyleSheet.absoluteFill, cs.wrap, { opacity: fade, backgroundColor: colors.mode === 'dark' ? 'rgba(0,0,0,0.45)' : 'rgba(19,32,25,0.28)' }]}>
+      <Pressable
+        onPress={onDone}
+        accessibilityRole="button"
+        accessibilityLabel={`${c.title}. ${t('close')}`}
+        style={[cs.card, { backgroundColor: chrome.backgroundColor, borderColor: chrome.borderTopColor, ...relief(colors, false) }]}
+      >
         <View style={cs.badgeWrap}>
           <Animated.View
             style={[
@@ -231,11 +242,11 @@ function CelebrationView({ c, onDone }: { c: Celebration; onDone: () => void }) 
             ]}
           />
           <Animated.View style={[cs.badge, { backgroundColor: accent, transform: [{ scale: pop }] }]}>
-            <Ionicons name={c.icon ?? 'checkmark'} size={34} color={__THEME__.surface} />
+            <Ionicons name={c.icon ?? 'checkmark'} size={34} color={ink} />
           </Animated.View>
         </View>
-        <Text style={[cs.title, { color: __THEME__.text }]}>{c.title}</Text>
-        {c.subtitle ? <Text style={[cs.sub, { color: __THEME__.muted }]}>{c.subtitle}</Text> : null}
+        <Text allowFontScaling maxFontSizeMultiplier={2} style={[cs.title, { color: colors.text }]}>{c.title}</Text>
+        {c.subtitle ? <Text allowFontScaling maxFontSizeMultiplier={2} style={[cs.sub, { color: colors.muted }]}>{c.subtitle}</Text> : null}
       </Pressable>
     </Animated.View>
   );
@@ -264,6 +275,7 @@ const cs = StyleSheet.create({
 });
 
 function ToastView({ t: x, onDone }: { t: Toast; onDone: () => void }) {
+  const { colors } = useVerre();
   const v = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     AccessibilityInfo.announceForAccessibility?.(x.text);
@@ -275,16 +287,15 @@ function ToastView({ t: x, onDone }: { t: Toast; onDone: () => void }) {
     seq.start(({ finished }) => finished && onDone());
     return () => seq.stop();
   }, [x, v, onDone]);
-  // Pastille inversée (texte sur fond « encre ») : lisible en clair comme en sombre.
-  const fg = __THEME__.surface;
+  const fg = colors.bg;
   return (
     <Animated.View
       pointerEvents="box-none"
-      style={[ts.wrap, { opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) }] }]}
+      style={[ts.wrap, { opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [prefersReducedMotion() ? 0 : 24, 0] }) }] }]}
     >
-      <View accessibilityRole="alert" style={[ts.pill, { backgroundColor: __THEME__.text }]}>
+      <View accessibilityRole="alert" style={[ts.pill, { backgroundColor: colors.text }]}>
         <Ionicons name={x.icon ?? (x.tone === 'danger' ? 'alert-circle' : 'checkmark-circle')} size={18} color={fg} />
-        <Text style={[ts.text, { color: __THEME__.surface }]}>{x.text}</Text>
+        <Text allowFontScaling maxFontSizeMultiplier={2} style={[ts.text, { color: colors.bg }]}>{x.text}</Text>
       </View>
     </Animated.View>
   );
@@ -310,6 +321,7 @@ const ts = StyleSheet.create({
 
 /** Respiration lente (attente courte : démarrage, synchronisation) — remplace l'indicateur rotatif. */
 export function Breathing({ children, size = 72, color, style }: { children?: ReactNode; size?: number; color: string; style?: StyleProp<ViewStyle> }) {
+  const { t } = useI18n();
   const v = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -325,7 +337,7 @@ export function Breathing({ children, size = 72, color, style }: { children?: Re
   const scale = v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.18] });
   const opacity = v.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.08] });
   return (
-    <View accessibilityRole="progressbar" accessibilityLabel="Chargement…" style={[{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }, style]}>
+    <View accessibilityRole="progressbar" accessibilityLabel={t('loading')} style={[{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }, style]}>
       <Animated.View style={[StyleSheet.absoluteFill, { borderRadius: size / 2, backgroundColor: color, opacity, transform: [{ scale }] }]} />
       {children}
     </View>
@@ -334,6 +346,7 @@ export function Breathing({ children, size = 72, color, style }: { children?: Re
 
 /** Barre de progression qui glisse en ressort jusqu'à sa valeur (0–1). */
 export function ProgressBar({ value, color, track, height = 8, label, style }: { value: number; color: string; track?: string; height?: number; label?: string; style?: StyleProp<ViewStyle> }) {
+  const { colors } = useVerre();
   const v = useRef(new Animated.Value(prefersReducedMotion() ? value : 0)).current;
   useEffect(() => {
     const c = Math.max(0, Math.min(1, value));
@@ -346,7 +359,7 @@ export function ProgressBar({ value, color, track, height = 8, label, style }: {
       accessibilityRole="progressbar"
       accessibilityLabel={label}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(Math.max(0, Math.min(1, value)) * 100) }}
-      style={[{ height, borderRadius: height / 2, backgroundColor: track ?? __THEME__.surfaceAlt, overflow: 'hidden', marginVertical: 10 }, style]}
+      style={[{ height, borderRadius: height / 2, backgroundColor: track ?? colors.surfaceAlt, overflow: 'hidden', marginVertical: 10 }, style]}
     >
       <Animated.View style={{ width, height, borderRadius: height / 2, backgroundColor: color }} />
     </View>

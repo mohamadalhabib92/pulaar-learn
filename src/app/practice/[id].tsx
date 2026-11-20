@@ -11,14 +11,36 @@ import { findLesson } from '../../data/lessons';
 import { useI18n } from '../../lib/i18n';
 import { buildBoss, buildLessonQuiz } from '../../lib/practice';
 import { appStore, finishBoss, finishPractice } from '../../lib/store';
-import { colors, radius, space } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 const XP_PER = 10;
 
 export default function Practice() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, lang } = useI18n();
+  const { colors, radius, space, glassChrome, contactShadow } = useVerre();
   const { questEnabled } = appStore.useStore();
+  const styles = useMemo(() => {
+    const chrome = glassChrome(colors);
+    return StyleSheet.create({
+      prompt: { fontSize: 22, fontWeight: '700' },
+      puPrompt: { fontSize: 32, fontWeight: '800', color: colors.primary },
+      opt: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: space.sm,
+        backgroundColor: chrome.backgroundColor,
+        borderWidth: 1.5,
+        borderColor: chrome.borderColor,
+        borderRadius: radius.md,
+        padding: space.lg,
+        minHeight: 56,
+        ...contactShadow(colors),
+      },
+      optOk: { borderColor: colors.ok, backgroundColor: colors.okSoft },
+      optKo: { borderColor: colors.danger, backgroundColor: colors.dangerSoft },
+    });
+  }, [colors, radius, space, glassChrome, contactShadow]);
   const isBoss = id === 'boss';
   const lesson = isBoss ? findLesson('pc-1') : findLesson(String(id));
   const [round, setRound] = useState(0);
@@ -129,9 +151,10 @@ export default function Practice() {
             <Pressable
               key={o}
               accessibilityRole="button"
+              accessibilityLabel={o}
               accessibilityState={{ selected: picked === o, disabled: answered }}
               onPress={() => choose(o)}
-              style={({ pressed }) => [styles.opt, state === 'ok' && styles.optOk, state === 'ko' && styles.optKo, pressed && !answered && { opacity: 0.8 }]}
+              style={({ pressed }) => [styles.opt, state === 'ok' && styles.optOk, state === 'ko' && styles.optKo, pressed && !answered && { opacity: 0.85, transform: [{ translateY: 1 }] }]}
             >
               {q.promptIsPu ? (
                 <Body style={{ flex: 1, fontSize: 16 }}>{o}</Body>
@@ -144,7 +167,7 @@ export default function Practice() {
         })}
       </View>
       {answered ? (
-        <Card style={{ gap: space.sm, backgroundColor: right ? '#E3F6EA' : '#FDECEA' }}>
+        <Card style={{ gap: space.sm, backgroundColor: right ? colors.okSoft : colors.dangerSoft }}>
           <Body style={{ fontWeight: '700' }} color={right ? colors.ok : colors.danger}>
             {right ? (questEnabled ? t('correct', { xp: XP_PER }) : t('correctPlain')) : t('wrong', { a: q.answer })}
           </Body>
@@ -154,11 +177,3 @@ export default function Practice() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  prompt: { fontSize: 20, fontWeight: '700' },
-  puPrompt: { fontSize: 30, fontWeight: '800', color: colors.primary },
-  opt: { flexDirection: 'row', alignItems: 'center', gap: space.sm, backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md, padding: space.lg, minHeight: 56 },
-  optOk: { borderColor: colors.ok, backgroundColor: '#E3F6EA' },
-  optKo: { borderColor: colors.danger, backgroundColor: '#FDECEA' },
-});

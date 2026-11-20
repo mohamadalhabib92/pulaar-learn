@@ -1,12 +1,66 @@
 import { Ionicons } from '@expo/vector-icons';
 import { AudioSource, setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { fmtTime } from '../data/recordings';
 import { useI18n } from '../lib/i18n';
 import { appStore, markListened } from '../lib/store';
-import { colors, hit, radius, space, BOOT_TIMEOUT_MS } from '../theme';
+import { BOOT_TIMEOUT_MS } from '../theme';
+import { useVerre } from '../lib/verre';
 import { Body, Muted, Row, Slider } from './ui';
+
+function usePlayerStyles() {
+  const { colors, hit, radius, space, relief, contactShadow, glassChrome } = useVerre();
+  const styles = useMemo(() => {
+    const chrome = glassChrome(colors);
+    return StyleSheet.create({
+      box: {
+        backgroundColor: chrome.backgroundColor,
+        borderRadius: radius.lg,
+        padding: space.md,
+        gap: space.sm,
+        borderWidth: 1,
+        borderColor: chrome.borderColor,
+        borderTopColor: chrome.borderTopColor,
+      },
+      play: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: colors.primaryFill,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.5)',
+        overflow: 'hidden',
+        ...relief(colors, false),
+      },
+      round: {
+        width: hit.audio,
+        height: hit.audio,
+        borderRadius: hit.audio / 2,
+        backgroundColor: colors.surfaceSolid,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: colors.border,
+        ...contactShadow(colors),
+      },
+      rate: {
+        minHeight: hit.audio,
+        paddingHorizontal: 12,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: colors.border,
+        backgroundColor: colors.surfaceSolid,
+        minWidth: hit.audio,
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+    });
+  }, [colors, hit, radius, space, relief, contactShadow, glassChrome]);
+  return { styles, colors, space };
+}
 
 const RATES = [0.75, 1, 1.25];
 let modeSet = false;
@@ -32,8 +86,9 @@ export function AudioPlayer({
 
 export function AudioError() {
   const { t } = useI18n();
+  const { styles, colors } = usePlayerStyles();
   return (
-    <View style={[styles.box, { backgroundColor: '#FDECEA', borderColor: '#F5C6C2' }]} accessibilityRole="alert">
+    <View style={[styles.box, { backgroundColor: colors.dangerSoft, borderColor: colors.danger }]} accessibilityRole="alert">
       <Row>
         <Ionicons name="alert-circle-outline" size={20} color={colors.danger} />
         <Body style={{ fontWeight: '700', flex: 1 }} color={colors.danger}>
@@ -47,6 +102,7 @@ export function AudioError() {
 
 function Inner({ source, recId, fallbackDuration, initialRate }: { source: AudioSource; recId: string; fallbackDuration?: number; initialRate?: number }) {
   const { t, lang } = useI18n();
+  const { styles, colors, space } = usePlayerStyles();
   const storedRate = appStore.useStore().rate;
   const [rate, setRate] = useState(initialRate ?? storedRate ?? 1);
   const player = useAudioPlayer(source, { updateInterval: 250 });
@@ -157,7 +213,7 @@ function Inner({ source, recId, fallbackDuration, initialRate }: { source: Audio
               accessibilityState={{ selected: rate === r }}
               accessibilityLabel={`${t('speed')} ${r}×`}
               onPress={() => changeRate(r)}
-              style={[styles.rate, rate === r && { backgroundColor: colors.primary, borderColor: colors.primary }]}
+              style={[styles.rate, rate === r && { backgroundColor: colors.primaryFill, borderColor: colors.primaryFill }]}
             >
               <Body style={{ fontSize: 13, fontWeight: '700' }} color={rate === r ? colors.onPrimary : colors.text}>
                 {lang === 'fr' ? String(r).replace('.', ',') : String(r)}×
@@ -170,6 +226,7 @@ function Inner({ source, recId, fallbackDuration, initialRate }: { source: Audio
 }
 
 function RoundBtn({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }) {
+  const { styles, colors } = usePlayerStyles();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [styles.round, pressed && { opacity: 0.7 }]}>
       <Ionicons name={icon} size={20} color={colors.primary} />
@@ -177,10 +234,3 @@ function RoundBtn({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphM
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  box: { backgroundColor: colors.bg, borderRadius: radius.lg, padding: space.md, gap: space.sm, borderWidth: 1, borderColor: colors.border },
-  play: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  round: { width: hit.audio, height: hit.audio, borderRadius: hit.audio / 2, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border },
-  rate: { minHeight: hit.audio, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, minWidth: hit.audio, alignItems: 'center', justifyContent: 'center' },
-});

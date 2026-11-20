@@ -4,18 +4,20 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { Platform, TextInput, View } from 'react-native';
 import { BackBar } from '../components/BackBar';
-import { Body, Button, Card, Chip, H1, H3, Muted, Row, Screen } from '../components/ui';
+import { Body, Button, Card, Chip, H1, H3, Muted, Row, Screen, useInputStyle } from '../components/ui';
 import { LESSONS } from '../data/lessons';
 import { Tag, TAGS } from '../data/recordings';
 import { ACCEPTED, extOf, probeDurationWeb, storeImport } from '../lib/audioFiles';
 import { useI18n } from '../lib/i18n';
 import { addImport } from '../lib/store';
-import { colors, radius, space } from '../theme';
+import { useVerre } from '../lib/verre';
 
 type Picked = { uri: string; name: string; mimeType?: string; file?: File };
 
 export default function ImportScreen() {
   const { t } = useI18n();
+  const { colors, space } = useVerre();
+  const input = useInputStyle();
   const params = useLocalSearchParams<{ lesson?: string }>();
   const [file, setFile] = useState<Picked | null>(null);
   const [title, setTitle] = useState('');
@@ -75,8 +77,6 @@ export default function ImportScreen() {
       setBusy(false);
     }
   };
-
-  const input = { borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: space.md, fontSize: 16, color: colors.text, backgroundColor: colors.surface } as const;
 
   return (
     <Screen>
