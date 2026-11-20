@@ -2,7 +2,7 @@ import type { Lang } from '../i18n/strings';
 import type { Tag } from '../data/recordings';
 import type { PackFilter } from '../data/packs';
 import { LESSONS } from '../data/lessons';
-import { mergeAppState } from './migrate';
+import { mergeAppState, resetProgressPatch } from './migrate';
 import { createPersistedStore } from './persist';
 
 export type LessonProgress = { seen: boolean; best: number; attempts: number };
@@ -141,19 +141,8 @@ export const setTranscript = (recId: string, text: string) =>
     return { transcripts: { ...s.transcripts, [recId]: text } };
   });
 
-/** Réinitialise la progression mais garde langue, réglages, imports et transcriptions. */
-export const resetProgress = () =>
-  appStore.set((s) => ({
-    ...initial,
-    lang: s.lang,
-    questEnabled: s.questEnabled,
-    dailyGoal: s.dailyGoal,
-    imports: s.imports,
-    transcripts: s.transcripts,
-    rate: s.rate,
-    packFilter: s.packFilter,
-    reduceMotion: s.reduceMotion,
-  }));
+/** Réinitialise la progression. Garde langue, réglages, imports, transcriptions et champs inconnus. */
+export const resetProgress = () => appStore.set((s) => resetProgressPatch(s));
 
 export const lessonStatus = (s: AppState, id: string): 'mastered' | 'seen' | 'new' => {
   const p = s.lessons[id];

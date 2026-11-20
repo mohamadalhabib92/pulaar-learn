@@ -60,6 +60,7 @@ export async function loadImportUri(m: { id: string; storage: 'idb' | 'file'; ur
   return blob ? URL.createObjectURL(blob) : null;
 }
 
+/** Seul chemin qui retire un fichier importé. L’hydratation, la réinitialisation et l’absence de compte ne l’appellent pas. */
 export async function deleteImportFile(m: { id: string; storage: 'idb' | 'file'; uri: string | null }) {
   try {
     if (m.storage === 'idb') await idb('readwrite', (s) => s.delete(m.id));
