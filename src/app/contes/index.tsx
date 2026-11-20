@@ -7,10 +7,11 @@ import { EPISODES, SERIES, WORLDS, filledSections } from '../../data/contes';
 import { CONTES_PROVENANCE } from '../../data/packs';
 import { TARO } from '../../data/taro';
 import { useI18n } from '../../lib/i18n';
-import { colors, space } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 export default function ContesIndex() {
   const { t, lang } = useI18n();
+  const { colors, space } = useVerre();
   return (
     <Screen>
       <BackBar label={t('back')} />

@@ -4,7 +4,7 @@ import { findBundled } from '../data/recordings';
 import { useI18n } from '../lib/i18n';
 import { isOffline, makeOffline, offlineSupported } from '../lib/offline';
 import { useRecordingSource } from '../lib/useRecording';
-import { colors } from '../theme';
+import { useVerre } from '../lib/verre';
 import { AudioPlayer } from './AudioPlayer';
 import { Badge, Button, Muted, Row, Skeleton } from './ui';
 
@@ -23,6 +23,7 @@ export function RecPlayer({ recId, initialRate }: { recId: string; initialRate?:
 /** Web uniquement : met le MP3 en cache pour la lecture hors ligne. Sur mobile, l'audio est embarqué. */
 export function OfflineButton({ mod }: { mod: number }) {
   const { t } = useI18n();
+  const { colors } = useVerre();
   const [ready, setReady] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [fail, setFail] = useState(false);

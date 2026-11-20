@@ -2,8 +2,20 @@ import React from 'react';
 import { View } from 'react-native';
 import { dictionaries } from '../i18n/strings';
 import { captureException } from '../lib/crash';
-import { colors, space } from '../theme';
+import { useVerre } from '../lib/verre';
 import { Body, Button, H1 } from './ui';
+
+function CrashScreen({ onRetry }: { onRetry: () => void }) {
+  const { colors, space } = useVerre();
+  const t = dictionaries.fr;
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: space.xl, gap: space.md }}>
+      <H1 center>{t.crashTitle}</H1>
+      <Body center color={colors.muted}>{t.crashText}</Body>
+      <Button label={t.bootRetry} onPress={onRetry} />
+    </View>
+  );
+}
 
 type Props = { children: React.ReactNode };
 type State = { error: Error | null };
@@ -22,13 +34,6 @@ export class AppErrorBoundary extends React.Component<Props, State> {
 
   render() {
     if (!this.state.error) return this.props.children;
-    const t = dictionaries.fr;
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: space.xl, gap: space.md }}>
-        <H1 center>{t.crashTitle}</H1>
-        <Body center color={colors.muted}>{t.crashText}</Body>
-        <Button label={t.bootRetry} onPress={() => this.setState({ error: null })} />
-      </View>
-    );
+    return <CrashScreen onRetry={() => this.setState({ error: null })} />;
   }
 }

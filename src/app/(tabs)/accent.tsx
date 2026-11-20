@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { RecPlayer } from '../../components/RecPlayer';
 import { Body, Button, Card, H1, H2, H3, Muted, PulaarText, Row, Screen } from '../../components/ui';
@@ -10,10 +10,41 @@ import { useI18n } from '../../lib/i18n';
 import { BOSS_SOUNDS } from '../../lib/practice';
 import { appStore, openedJanngu } from '../../lib/store';
 import { synthesize } from '../../lib/tts';
-import { colors, radius, space } from '../../theme';
+import { useVerre } from '../../lib/verre';
 
 export default function Accent() {
   const { t, lang } = useI18n();
+  const { colors, radius, space, relief, glassChrome } = useVerre();
+  const styles = useMemo(() => {
+    const chrome = glassChrome(colors);
+    return StyleSheet.create({
+      grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+      cell: {
+        width: '31%',
+        flexGrow: 1,
+        backgroundColor: chrome.backgroundColor,
+        borderRadius: radius.md,
+        borderWidth: 1,
+        borderColor: chrome.borderColor,
+        padding: space.sm,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 2,
+        minHeight: 96,
+      },
+      letter: { fontSize: 32, fontWeight: '800', color: colors.primary },
+      link: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: colors.surfaceSolid,
+        borderRadius: 999,
+        paddingHorizontal: space.md,
+        minHeight: 44,
+      },
+      notice: { backgroundColor: colors.accentSoft, borderRadius: radius.md, padding: space.md, gap: 4 },
+    });
+  }, [colors, radius, space, glassChrome]);
   const { bossBest } = appStore.useStore();
   const [tts, setTts] = useState<null | 'not_configured' | 'payment' | 'error' | 'busy'>(null);
   const [showNative, setShowNative] = useState(false);
@@ -27,9 +58,9 @@ export default function Accent() {
     <Screen>
       <H1>{t('accentTitle')}</H1>
 
-      <Card style={{ gap: space.sm, backgroundColor: colors.primary }}>
+      <Card style={{ gap: space.sm, backgroundColor: colors.primaryFill, ...relief(colors, false) }}>
         <Row>
-          <Ionicons name="radio-outline" size={22} color={colors.accent} />
+          <Ionicons name="radio-outline" size={22} color={colors.accentFill} />
           <H2 color={colors.onPrimary} style={{ flex: 1 }}>Janngu</H2>
         </Row>
         <Body color={colors.onPrimary} style={{ fontWeight: '700' }}>{t('jannguLabel')}</Body>
@@ -94,18 +125,28 @@ export default function Accent() {
 }
 
 function LinkBtn({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }) {
+  const { colors, space, contactShadow } = useVerre();
   return (
-    <Pressable accessibilityRole="link" accessibilityLabel={`Janngu ${label}`} onPress={onPress} style={({ pressed }) => [styles.link, pressed && { opacity: 0.8 }]}>
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={`Janngu ${label}`}
+      onPress={onPress}
+      style={({ pressed }) => [
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 6,
+          backgroundColor: colors.surfaceSolid,
+          borderRadius: 999,
+          paddingHorizontal: space.md,
+          minHeight: 44,
+          opacity: pressed ? 0.8 : 1,
+          ...contactShadow(colors),
+        },
+      ]}
+    >
       <Ionicons name={icon} size={16} color={colors.primary} />
       <Body style={{ fontWeight: '700', fontSize: 14 }} color={colors.primary}>{label}</Body>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  cell: { width: '31%', flexGrow: 1, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, padding: space.sm, alignItems: 'center', gap: 2, minHeight: 96 },
-  letter: { fontSize: 30, fontWeight: '800', color: colors.primary },
-  link: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.surface, borderRadius: 999, paddingHorizontal: space.md, minHeight: 44 },
-  notice: { backgroundColor: colors.accentSoft, borderRadius: radius.md, padding: space.md, gap: 4 },
-});
